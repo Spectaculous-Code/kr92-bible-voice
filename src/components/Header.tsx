@@ -1,9 +1,10 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, ChevronDown, Menu as MenuIcon } from "lucide-react";
-import { bibleBooks } from "@/data/mockBibleData";
+import { getBibleBooks, getBookChapters, BibleBook } from "@/lib/bibleService";
 
 interface HeaderProps {
   selectedBook: string;
@@ -13,8 +14,30 @@ interface HeaderProps {
 }
 
 const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }: HeaderProps) => {
-  const currentBook = bibleBooks.find(book => book.name === selectedBook);
-  const chapters = currentBook ? Array.from({ length: currentBook.chapters }, (_, i) => i + 1) : [];
+  const [bibleBooks, setBibleBooks] = useState<BibleBook[]>([]);
+  const [chaptersCount, setChaptersCount] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      const books = await getBibleBooks();
+      setBibleBooks(books);
+      setLoading(false);
+    };
+    fetchBooks();
+  }, []);
+
+  useEffect(() => {
+    const fetchChapters = async () => {
+      if (selectedBook) {
+        const count = await getBookChapters(selectedBook);
+        setChaptersCount(count);
+      }
+    };
+    fetchChapters();
+  }, [selectedBook]);
+
+  const chapters = Array.from({ length: chaptersCount }, (_, i) => i + 1);
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50">
@@ -26,22 +49,28 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
               <SelectValue placeholder="Valitse kirja" />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 py-1 text-xs font-medium text-muted-foreground">UUSI TESTAMENTTI</div>
-              {bibleBooks
-                .filter(book => book.testament === "new")
-                .map((book) => (
-                  <SelectItem key={book.name} value={book.name}>
-                    {book.name}
-                  </SelectItem>
-                ))}
-              <div className="px-2 py-1 text-xs font-medium text-muted-foreground mt-2">VANHA TESTAMENTTI</div>
-              {bibleBooks
-                .filter(book => book.testament === "old")
-                .map((book) => (
-                  <SelectItem key={book.name} value={book.name}>
-                    {book.name}
-                  </SelectItem>
-                ))}
+              {loading ? (
+                <div className="px-2 py-1 text-sm text-muted-foreground">Ladataan...</div>
+              ) : (
+                <>
+                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground">UUSI TESTAMENTTI</div>
+                  {bibleBooks
+                    .filter(book => book.testament === "new")
+                    .map((book) => (
+                      <SelectItem key={book.id} value={book.name}>
+                        {book.name}
+                      </SelectItem>
+                    ))}
+                  <div className="px-2 py-1 text-xs font-medium text-muted-foreground mt-2">VANHA TESTAMENTTI</div>
+                  {bibleBooks
+                    .filter(book => book.testament === "old")
+                    .map((book) => (
+                      <SelectItem key={book.id} value={book.name}>
+                        {book.name}
+                      </SelectItem>
+                    ))}
+                </>
+              )}
             </SelectContent>
           </Select>
 

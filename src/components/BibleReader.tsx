@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { getMockChapter } from "@/data/mockBibleData";
+import { getChapterData, ChapterWithVerses } from "@/lib/bibleService";
 import VerseHighlighter from "./VerseHighlighter";
 
 interface BibleReaderProps {
@@ -16,10 +16,21 @@ const BibleReader = ({ book, chapter }: BibleReaderProps) => {
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const [chapterData, setChapterData] = useState<ChapterWithVerses | null>(null);
+  const [loading, setLoading] = useState(true);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
-  const chapterData = getMockChapter(book, chapter);
+  useEffect(() => {
+    const fetchChapterData = async () => {
+      setLoading(true);
+      const data = await getChapterData(book, chapter);
+      setChapterData(data);
+      setLoading(false);
+    };
+
+    fetchChapterData();
+  }, [book, chapter]);
 
   const togglePlayback = () => {
     if (isPlaying) {
@@ -87,6 +98,34 @@ const BibleReader = ({ book, chapter }: BibleReaderProps) => {
     });
   };
 
+  if (loading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
+        </div>
+        <Card className="p-6">
+          <div className="text-center text-muted-foreground">Ladataan...</div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!chapterData) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
+        </div>
+        <Card className="p-6">
+          <div className="text-center text-muted-foreground">Lukua ei löytynyt</div>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       {/* Chapter Header */}
@@ -140,12 +179,12 @@ const BibleReader = ({ book, chapter }: BibleReaderProps) => {
         <div className="space-y-4 leading-relaxed text-lg">
           {chapterData.verses.map((verse) => (
             <VerseHighlighter
-              key={verse.number}
-              verse={verse}
-              isHighlighted={highlights.has(verse.number)}
-              isCurrentVerse={currentVerse === verse.number}
-              onHighlight={() => toggleHighlight(verse.number)}
-              onVerseClick={() => setCurrentVerse(verse.number)}
+              key={verse.verse_number}
+              verse={{ number: verse.verse_number, text: verse.text }}
+              isHighlighted={highlights.has(verse.verse_number)}
+              isCurrentVerse={currentVerse === verse.verse_number}
+              onHighlight={() => toggleHighlight(verse.verse_number)}
+              onVerseClick={() => setCurrentVerse(verse.verse_number)}
             />
           ))}
         </div>
