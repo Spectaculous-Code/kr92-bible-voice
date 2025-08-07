@@ -26,17 +26,17 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
               <SelectValue placeholder="Valitse kirja" />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 py-1 text-xs font-medium text-muted-foreground">VANHA TESTAMENTTI</div>
+              <div className="px-2 py-1 text-xs font-medium text-muted-foreground">UUSI TESTAMENTTI</div>
               {bibleBooks
-                .filter(book => book.testament === "old")
+                .filter(book => book.testament === "new")
                 .map((book) => (
                   <SelectItem key={book.name} value={book.name}>
                     {book.name}
                   </SelectItem>
                 ))}
-              <div className="px-2 py-1 text-xs font-medium text-muted-foreground mt-2">UUSI TESTAMENTTI</div>
+              <div className="px-2 py-1 text-xs font-medium text-muted-foreground mt-2">VANHA TESTAMENTTI</div>
               {bibleBooks
-                .filter(book => book.testament === "new")
+                .filter(book => book.testament === "old")
                 .map((book) => (
                   <SelectItem key={book.name} value={book.name}>
                     {book.name}
