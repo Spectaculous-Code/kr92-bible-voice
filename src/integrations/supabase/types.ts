@@ -77,7 +77,7 @@ export type Database = {
           created_at: string
           id: string
           name: string
-          testament: string
+          testament: Database["public"]["Enums"]["testament_t"]
         }
         Insert: {
           book_order: number
@@ -85,7 +85,7 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
-          testament: string
+          testament: Database["public"]["Enums"]["testament_t"]
         }
         Update: {
           book_order?: number
@@ -93,7 +93,7 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
-          testament?: string
+          testament?: Database["public"]["Enums"]["testament_t"]
         }
         Relationships: []
       }
@@ -197,7 +197,7 @@ export type Database = {
           content: string | null
           created_at: string
           id: string
-          marking_type: string
+          marking_type: Database["public"]["Enums"]["marking_t"]
           updated_at: string
           user_id: string
           verse_id: string
@@ -207,7 +207,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
-          marking_type: string
+          marking_type: Database["public"]["Enums"]["marking_t"]
           updated_at?: string
           user_id: string
           verse_id: string
@@ -217,7 +217,7 @@ export type Database = {
           content?: string | null
           created_at?: string
           id?: string
-          marking_type?: string
+          marking_type?: Database["public"]["Enums"]["marking_t"]
           updated_at?: string
           user_id?: string
           verse_id?: string
@@ -236,7 +236,7 @@ export type Database = {
         Row: {
           book_id: string
           chapter_number: number
-          history_type: string
+          history_type: Database["public"]["Enums"]["history_t"]
           id: string
           last_read_at: string
           user_id: string
@@ -245,7 +245,7 @@ export type Database = {
         Insert: {
           book_id: string
           chapter_number: number
-          history_type?: string
+          history_type?: Database["public"]["Enums"]["history_t"]
           id?: string
           last_read_at?: string
           user_id: string
@@ -254,7 +254,7 @@ export type Database = {
         Update: {
           book_id?: string
           chapter_number?: number
-          history_type?: string
+          history_type?: Database["public"]["Enums"]["history_t"]
           id?: string
           last_read_at?: string
           user_id?: string
@@ -326,7 +326,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      history_t: "read" | "listen"
+      marking_t: "highlight" | "comment" | "like"
+      testament_t: "old" | "new"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -453,6 +455,10 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      history_t: ["read", "listen"],
+      marking_t: ["highlight", "comment", "like"],
+      testament_t: ["old", "new"],
+    },
   },
 } as const
