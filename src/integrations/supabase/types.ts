@@ -47,6 +47,13 @@ export type Database = {
             foreignKeyName: "audio_assets_chapter_id_fkey"
             columns: ["chapter_id"]
             isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["chapter_id"]
+          },
+          {
+            foreignKeyName: "audio_assets_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
             referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
@@ -88,6 +95,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "audio_assets"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_cues_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
           },
           {
             foreignKeyName: "audio_cues_verse_id_fkey"
@@ -145,6 +159,13 @@ export type Database = {
           verse_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "bookmarks_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
+          },
           {
             foreignKeyName: "bookmarks_verse_id_fkey"
             columns: ["verse_id"]
@@ -217,6 +238,13 @@ export type Database = {
             referencedRelation: "books"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "chapters_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["book_id"]
+          },
         ]
       }
       highlights: {
@@ -245,6 +273,13 @@ export type Database = {
           verse_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "highlights_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
+          },
           {
             foreignKeyName: "highlights_verse_id_fkey"
             columns: ["verse_id"]
@@ -314,6 +349,13 @@ export type Database = {
             foreignKeyName: "user_markings_verse_id_fkey"
             columns: ["verse_id"]
             isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "user_markings_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
             referencedRelation: "verses"
             referencedColumns: ["id"]
           },
@@ -365,11 +407,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "user_reading_history_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["book_id"]
+          },
+          {
+            foreignKeyName: "user_reading_history_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["chapter_id"]
+          },
+          {
             foreignKeyName: "user_reading_history_chapter_id_fkey"
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reading_history_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
           },
           {
             foreignKeyName: "user_reading_history_verse_id_fkey"
@@ -417,6 +480,13 @@ export type Database = {
             referencedRelation: "books"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "verse_keys_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["book_id"]
+          },
         ]
       }
       verses: {
@@ -458,6 +528,13 @@ export type Database = {
             foreignKeyName: "verses_chapter_id_fkey"
             columns: ["chapter_id"]
             isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["chapter_id"]
+          },
+          {
+            foreignKeyName: "verses_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
             referencedRelation: "chapters"
             referencedColumns: ["id"]
           },
@@ -479,7 +556,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      chapter_verses_mv: {
+        Row: {
+          book_code: string | null
+          book_id: string | null
+          book_name: string | null
+          book_order: number | null
+          chapter_audio_url: string | null
+          chapter_id: string | null
+          chapter_number: number | null
+          osis: string | null
+          testament: Database["public"]["Enums"]["testament_t"] | null
+          text: string | null
+          verse_audio_url: string | null
+          verse_id: string | null
+          verse_number: number | null
+          verses_count: number | null
+          version_code: string | null
+          version_id: string | null
+          version_language: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verses_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       [_ in never]: never
