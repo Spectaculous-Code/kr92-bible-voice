@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      audio_assets: {
+        Row: {
+          chapter_id: string
+          duration_ms: number | null
+          file_url: string
+          id: string
+          narrator: string | null
+          quality: string | null
+          version_id: string
+        }
+        Insert: {
+          chapter_id: string
+          duration_ms?: number | null
+          file_url: string
+          id?: string
+          narrator?: string | null
+          quality?: string | null
+          version_id: string
+        }
+        Update: {
+          chapter_id?: string
+          duration_ms?: number | null
+          file_url?: string
+          id?: string
+          narrator?: string | null
+          quality?: string | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_assets_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_assets_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audio_cues: {
+        Row: {
+          audio_id: string
+          end_ms: number | null
+          id: string
+          start_ms: number
+          verse_id: string
+        }
+        Insert: {
+          audio_id: string
+          end_ms?: number | null
+          id?: string
+          start_ms: number
+          verse_id: string
+        }
+        Update: {
+          audio_id?: string
+          end_ms?: number | null
+          id?: string
+          start_ms?: number
+          verse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audio_cues_audio_id_fkey"
+            columns: ["audio_id"]
+            isOneToOne: false
+            referencedRelation: "audio_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audio_cues_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bible_versions: {
         Row: {
           code: string
@@ -74,6 +158,7 @@ export type Database = {
         Row: {
           book_order: number
           chapters_count: number
+          code: string | null
           created_at: string
           id: string
           name: string
@@ -82,6 +167,7 @@ export type Database = {
         Insert: {
           book_order: number
           chapters_count: number
+          code?: string | null
           created_at?: string
           id?: string
           name: string
@@ -90,6 +176,7 @@ export type Database = {
         Update: {
           book_order?: number
           chapters_count?: number
+          code?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -235,34 +322,96 @@ export type Database = {
       user_reading_history: {
         Row: {
           book_id: string
+          chapter_id: string | null
           chapter_number: number
           history_type: Database["public"]["Enums"]["history_t"]
           id: string
           last_read_at: string
           user_id: string
+          verse_id: string | null
           verse_number: number
+          version_id: string | null
         }
         Insert: {
           book_id: string
+          chapter_id?: string | null
           chapter_number: number
           history_type?: Database["public"]["Enums"]["history_t"]
           id?: string
           last_read_at?: string
           user_id: string
+          verse_id?: string | null
           verse_number?: number
+          version_id?: string | null
         }
         Update: {
           book_id?: string
+          chapter_id?: string | null
           chapter_number?: number
           history_type?: Database["public"]["Enums"]["history_t"]
           id?: string
           last_read_at?: string
           user_id?: string
+          verse_id?: string | null
           verse_number?: number
+          version_id?: string | null
         }
         Relationships: [
           {
             foreignKeyName: "user_reading_history_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reading_history_chapter_id_fkey"
+            columns: ["chapter_id"]
+            isOneToOne: false
+            referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reading_history_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_reading_history_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      verse_keys: {
+        Row: {
+          book_id: string
+          chapter_number: number
+          id: string
+          osis: string
+          verse_number: number
+        }
+        Insert: {
+          book_id: string
+          chapter_number: number
+          id?: string
+          osis: string
+          verse_number: number
+        }
+        Update: {
+          book_id?: string
+          chapter_number?: number
+          id?: string
+          osis?: string
+          verse_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verse_keys_book_id_fkey"
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
@@ -278,6 +427,7 @@ export type Database = {
           id: string
           text: string
           text_search: unknown | null
+          verse_key_id: string | null
           verse_number: number
           version_id: string
         }
@@ -288,6 +438,7 @@ export type Database = {
           id?: string
           text: string
           text_search?: unknown | null
+          verse_key_id?: string | null
           verse_number: number
           version_id: string
         }
@@ -298,6 +449,7 @@ export type Database = {
           id?: string
           text?: string
           text_search?: unknown | null
+          verse_key_id?: string | null
           verse_number?: number
           version_id?: string
         }
@@ -307,6 +459,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "verses_verse_key_id_fkey"
+            columns: ["verse_key_id"]
+            isOneToOne: false
+            referencedRelation: "verse_keys"
             referencedColumns: ["id"]
           },
           {
