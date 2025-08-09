@@ -41,6 +41,35 @@ export type Database = {
         }
         Relationships: []
       }
+      bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          user_id: string | null
+          verse_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          verse_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_id?: string | null
+          verse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookmarks_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       books: {
         Row: {
           book_order: number
@@ -70,6 +99,7 @@ export type Database = {
       }
       chapters: {
         Row: {
+          audio_url: string | null
           book_id: string
           chapter_number: number
           created_at: string
@@ -77,6 +107,7 @@ export type Database = {
           verses_count: number
         }
         Insert: {
+          audio_url?: string | null
           book_id: string
           chapter_number: number
           created_at?: string
@@ -84,6 +115,7 @@ export type Database = {
           verses_count: number
         }
         Update: {
+          audio_url?: string | null
           book_id?: string
           chapter_number?: number
           created_at?: string
@@ -96,6 +128,41 @@ export type Database = {
             columns: ["book_id"]
             isOneToOne: false
             referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      highlights: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string | null
+          verse_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+          verse_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string | null
+          verse_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "highlights_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
             referencedColumns: ["id"]
           },
         ]
@@ -169,26 +236,29 @@ export type Database = {
         Row: {
           book_id: string
           chapter_number: number
+          history_type: string
           id: string
           last_read_at: string
           user_id: string
-          verse_number: number | null
+          verse_number: number
         }
         Insert: {
           book_id: string
           chapter_number: number
+          history_type?: string
           id?: string
           last_read_at?: string
           user_id: string
-          verse_number?: number | null
+          verse_number?: number
         }
         Update: {
           book_id?: string
           chapter_number?: number
+          history_type?: string
           id?: string
           last_read_at?: string
           user_id?: string
-          verse_number?: number | null
+          verse_number?: number
         }
         Relationships: [
           {
@@ -207,6 +277,7 @@ export type Database = {
           created_at: string
           id: string
           text: string
+          text_search: unknown | null
           verse_number: number
           version_id: string
         }
@@ -216,6 +287,7 @@ export type Database = {
           created_at?: string
           id?: string
           text: string
+          text_search?: unknown | null
           verse_number: number
           version_id: string
         }
@@ -225,6 +297,7 @@ export type Database = {
           created_at?: string
           id?: string
           text?: string
+          text_search?: unknown | null
           verse_number?: number
           version_id?: string
         }
