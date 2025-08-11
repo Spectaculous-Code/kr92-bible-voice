@@ -37,117 +37,142 @@ export interface ChapterWithVerses {
 
 // Get all Bible versions
 export const getBibleVersions = async (): Promise<BibleVersion[]> => {
-  const { data, error } = await supabase
-    .from('bible_versions')
-    .select('*')
-    .eq('is_active', true)
-    .order('code');
+  try {
+    const response: any = await (supabase as any)
+      .from('bible_versions')
+      .select('*')
+      .eq('is_active', true)
+      .order('code');
 
-  if (error) {
-    console.error('Error fetching Bible versions:', error);
+    if (response.error) {
+      console.error('Error fetching Bible versions:', response.error);
+      return [];
+    }
+
+    return response.data || [];
+  } catch (error) {
+    console.error('Error in getBibleVersions:', error);
     return [];
   }
-
-  return data || [];
 };
 
 // Get all books for the default version
 export const getBibleBooks = async (versionCode: string = 'finprfinni'): Promise<BibleBook[]> => {
-  // First get the version
-  const { data: version, error: versionError } = await supabase
-    .from('bible_versions')
-    .select('id')
-    .eq('code', versionCode)
-    .single();
-
-  if (versionError || !version) {
-    console.error('Error fetching version:', versionError);
-    return [];
-  }
-
-  // Get books for this specific version
-  const { data: rawData, error } = await supabase
-    .from('books')
-    .select('id, name, testament, chapters_count, book_order')
-    .eq('version_id', version.id)
-    .order('book_order');
-
-  if (error) {
-    console.error('Error fetching books:', error);
-    return [];
-  }
-
-  if (!rawData) return [];
-  
-  const books: BibleBook[] = rawData.map((book: any) => ({
-    id: book.id,
-    name: book.name,
-    testament: book.testament,
-    chapters_count: book.chapters_count,
-    book_order: book.book_order
-  }));
-  
-  return books;
-};
-
-// Get chapter with verses
-export const getChapterData = async (bookName: string, chapterNumber: number, versionCode: string = 'finprfinni'): Promise<ChapterWithVerses | null> => {
   try {
-    // Get the version first
-    const { data: version, error: versionError } = await supabase
+    console.log('Fetching books for version:', versionCode);
+    
+    // Create a simple untyped supabase call
+    const supabaseQuery = (supabase as any);
+    
+    // First get the version
+    const versionResponse = await supabaseQuery
       .from('bible_versions')
       .select('id')
       .eq('code', versionCode)
       .single();
 
-    if (versionError || !version) {
-      console.error('Error fetching version:', versionError);
+    if (versionResponse.error || !versionResponse.data) {
+      console.error('Error fetching version:', versionResponse.error);
+      return [];
+    }
+
+    console.log('Version found:', versionResponse.data);
+
+    // Get books for this specific version
+    const booksResponse = await supabaseQuery
+      .from('books')
+      .select('id, name, testament, chapters_count, book_order')
+      .eq('version_id', versionResponse.data.id)
+      .order('book_order');
+
+    if (booksResponse.error) {
+      console.error('Error fetching books:', booksResponse.error);
+      return [];
+    }
+
+    if (!booksResponse.data) {
+      console.log('No books data returned');
+      return [];
+    }
+    
+    console.log('Books found:', booksResponse.data.length);
+    
+    // Map to our interface
+    const books: BibleBook[] = booksResponse.data.map((book: any) => ({
+      id: book.id,
+      name: book.name,
+      testament: book.testament,
+      chapters_count: book.chapters_count,
+      book_order: book.book_order
+    }));
+    
+    return books;
+  } catch (error) {
+    console.error('Error in getBibleBooks:', error);
+    return [];
+  }
+};
+
+// Get chapter with verses
+export const getChapterData = async (bookName: string, chapterNumber: number, versionCode: string = 'finprfinni'): Promise<ChapterWithVerses | null> => {
+  try {
+    const supabaseQuery = (supabase as any);
+    
+    // Get the version first
+    const versionResponse = await supabaseQuery
+      .from('bible_versions')
+      .select('id')
+      .eq('code', versionCode)
+      .single();
+
+    if (versionResponse.error || !versionResponse.data) {
+      console.error('Error fetching version:', versionResponse.error);
       return null;
     }
 
     // Get the book for this specific version
-    const { data: books, error: bookError } = await supabase
+    const bookResponse = await supabaseQuery
       .from('books')
       .select('id')
       .eq('name', bookName)
-      .eq('version_id', version.id)
+      .eq('version_id', versionResponse.data.id)
       .single();
 
-    if (bookError || !books) {
-      console.error('Error fetching book:', bookError);
+    if (bookResponse.error || !bookResponse.data) {
+      console.error('Error fetching book:', bookResponse.error);
       return null;
     }
 
     // Get the chapter
-    const { data: chapter, error: chapterError } = await supabase
+    const chapterResponse = await supabaseQuery
       .from('chapters')
       .select('id')
-      .eq('book_id', books.id)
+      .eq('book_id', bookResponse.data.id)
       .eq('chapter_number', chapterNumber)
       .single();
 
-    if (chapterError || !chapter) {
-      console.error('Error fetching chapter:', chapterError);
+    if (chapterResponse.error || !chapterResponse.data) {
+      console.error('Error fetching chapter:', chapterResponse.error);
       return null;
     }
 
     // Get verses for this chapter
-    const { data: verses, error: versesError } = await supabase
+    const versesResponse = await supabaseQuery
       .from('verses')
       .select('*')
-      .eq('chapter_id', chapter.id)
-      .eq('version_id', version.id)
+      .eq('chapter_id', chapterResponse.data.id)
+      .eq('version_id', versionResponse.data.id)
       .order('verse_number');
 
-    if (versesError) {
-      console.error('Error fetching verses:', versesError);
+    if (versesResponse.error) {
+      console.error('Error fetching verses:', versesResponse.error);
       return null;
     }
 
     return {
       book: bookName,
       chapter: chapterNumber,
-      verses: verses || []
+      verses: versesResponse.data || []
     };
   } catch (error) {
     console.error('Error in getChapterData:', error);
@@ -157,141 +182,162 @@ export const getChapterData = async (bookName: string, chapterNumber: number, ve
 
 // Get chapters for a book
 export const getBookChapters = async (bookName: string, versionCode: string = 'finprfinni'): Promise<number> => {
-  // First get the version
-  const { data: version, error: versionError } = await supabase
-    .from('bible_versions')
-    .select('id')
-    .eq('code', versionCode)
-    .single();
+  try {
+    const supabaseQuery = (supabase as any);
+    
+    // First get the version
+    const versionResponse = await supabaseQuery
+      .from('bible_versions')
+      .select('id')
+      .eq('code', versionCode)
+      .single();
 
-  if (versionError || !version) {
-    console.error('Error fetching version:', versionError);
+    if (versionResponse.error || !versionResponse.data) {
+      console.error('Error fetching version:', versionResponse.error);
+      return 0;
+    }
+
+    const bookResponse = await supabaseQuery
+      .from('books')
+      .select('chapters_count')
+      .eq('name', bookName)
+      .eq('version_id', versionResponse.data.id)
+      .single();
+
+    if (bookResponse.error) {
+      console.error('Error fetching book chapters:', bookResponse.error);
+      return 0;
+    }
+
+    return bookResponse.data?.chapters_count || 0;
+  } catch (error) {
+    console.error('Error in getBookChapters:', error);
     return 0;
   }
-
-  const { data, error } = await supabase
-    .from('books')
-    .select('chapters_count')
-    .eq('name', bookName)
-    .eq('version_id', version.id)
-    .single();
-
-  if (error) {
-    console.error('Error fetching book chapters:', error);
-    return 0;
-  }
-
-  return data?.chapters_count || 0;
 };
 
 // Get next chapter data (book and chapter number)
 export const getNextChapter = async (currentBookName: string, currentChapter: number, versionCode: string = 'finprfinni'): Promise<{book: string, chapter: number} | null> => {
-  // First get the version
-  const { data: version, error: versionError } = await supabase
-    .from('bible_versions')
-    .select('id')
-    .eq('code', versionCode)
-    .single();
+  try {
+    const supabaseQuery = (supabase as any);
+    
+    // First get the version
+    const versionResponse = await supabaseQuery
+      .from('bible_versions')
+      .select('id')
+      .eq('code', versionCode)
+      .single();
 
-  if (versionError || !version) {
-    console.error('Error fetching version:', versionError);
-    return null;
-  }
+    if (versionResponse.error || !versionResponse.data) {
+      console.error('Error fetching version:', versionResponse.error);
+      return null;
+    }
 
-  // First get the current book
-  const { data: currentBook, error: bookError } = await supabase
-    .from('books')
-    .select('id, chapters_count, book_order')
-    .eq('name', currentBookName)
-    .eq('version_id', version.id)
-    .single();
+    // First get the current book
+    const currentBookResponse = await supabaseQuery
+      .from('books')
+      .select('id, chapters_count, book_order')
+      .eq('name', currentBookName)
+      .eq('version_id', versionResponse.data.id)
+      .single();
 
-  if (bookError || !currentBook) {
-    console.error('Error fetching current book:', bookError);
-    return null;
-  }
+    if (currentBookResponse.error || !currentBookResponse.data) {
+      console.error('Error fetching current book:', currentBookResponse.error);
+      return null;
+    }
 
-  // If there's a next chapter in the same book
-  if (currentChapter < currentBook.chapters_count) {
+    // If there's a next chapter in the same book
+    if (currentChapter < currentBookResponse.data.chapters_count) {
+      return {
+        book: currentBookName,
+        chapter: currentChapter + 1
+      };
+    }
+
+    // Otherwise, get the next book
+    const nextBookResponse = await supabaseQuery
+      .from('books')
+      .select('name, chapters_count')
+      .eq('version_id', versionResponse.data.id)
+      .gt('book_order', currentBookResponse.data.book_order)
+      .order('book_order')
+      .limit(1)
+      .single();
+
+    if (nextBookResponse.error || !nextBookResponse.data) {
+      // No next book available
+      return null;
+    }
+
     return {
-      book: currentBookName,
-      chapter: currentChapter + 1
+      book: nextBookResponse.data.name,
+      chapter: 1
     };
-  }
-
-  // Otherwise, get the next book
-  const { data: nextBook, error: nextBookError } = await supabase
-    .from('books')
-    .select('name, chapters_count')
-    .eq('version_id', version.id)
-    .gt('book_order', currentBook.book_order)
-    .order('book_order')
-    .limit(1)
-    .single();
-
-  if (nextBookError || !nextBook) {
-    // No next book available
+  } catch (error) {
+    console.error('Error in getNextChapter:', error);
     return null;
   }
-
-  return {
-    book: nextBook.name,
-    chapter: 1
-  };
 };
 
 // Get previous chapter data (book and chapter number)
 export const getPreviousChapter = async (currentBookName: string, currentChapter: number, versionCode: string = 'finprfinni'): Promise<{book: string, chapter: number} | null> => {
-  // First get the version
-  const { data: version, error: versionError } = await supabase
-    .from('bible_versions')
-    .select('id')
-    .eq('code', versionCode)
-    .single();
+  try {
+    const supabaseQuery = (supabase as any);
+    
+    // First get the version
+    const versionResponse = await supabaseQuery
+      .from('bible_versions')
+      .select('id')
+      .eq('code', versionCode)
+      .single();
 
-  if (versionError || !version) {
-    console.error('Error fetching version:', versionError);
-    return null;
-  }
+    if (versionResponse.error || !versionResponse.data) {
+      console.error('Error fetching version:', versionResponse.error);
+      return null;
+    }
 
-  // First get the current book
-  const { data: currentBook, error: bookError } = await supabase
-    .from('books')
-    .select('id, chapters_count, book_order')
-    .eq('name', currentBookName)
-    .eq('version_id', version.id)
-    .single();
+    // First get the current book
+    const currentBookResponse = await supabaseQuery
+      .from('books')
+      .select('id, chapters_count, book_order')
+      .eq('name', currentBookName)
+      .eq('version_id', versionResponse.data.id)
+      .single();
 
-  if (bookError || !currentBook) {
-    console.error('Error fetching current book:', bookError);
-    return null;
-  }
+    if (currentBookResponse.error || !currentBookResponse.data) {
+      console.error('Error fetching current book:', currentBookResponse.error);
+      return null;
+    }
 
-  // If there's a previous chapter in the same book
-  if (currentChapter > 1) {
+    // If there's a previous chapter in the same book
+    if (currentChapter > 1) {
+      return {
+        book: currentBookName,
+        chapter: currentChapter - 1
+      };
+    }
+
+    // Otherwise, get the previous book
+    const prevBookResponse = await supabaseQuery
+      .from('books')
+      .select('name, chapters_count')
+      .eq('version_id', versionResponse.data.id)
+      .lt('book_order', currentBookResponse.data.book_order)
+      .order('book_order', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (prevBookResponse.error || !prevBookResponse.data) {
+      // No previous book available
+      return null;
+    }
+
     return {
-      book: currentBookName,
-      chapter: currentChapter - 1
+      book: prevBookResponse.data.name,
+      chapter: prevBookResponse.data.chapters_count
     };
-  }
-
-  // Otherwise, get the previous book
-  const { data: prevBook, error: prevBookError } = await supabase
-    .from('books')
-    .select('name, chapters_count')
-    .eq('version_id', version.id)
-    .lt('book_order', currentBook.book_order)
-    .order('book_order', { ascending: false })
-    .limit(1)
-    .single();
-
-  if (prevBookError || !prevBook) {
-    // No previous book available
+  } catch (error) {
+    console.error('Error in getPreviousChapter:', error);
     return null;
   }
-
-  return {
-    book: prevBook.name,
-    chapter: prevBook.chapters_count
-  };
 };
