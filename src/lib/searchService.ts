@@ -129,7 +129,7 @@ function normalizeBookName(bookPart: string): string {
 }
 
 // Search for Bible references
-export async function searchReference(reference: SearchResult['reference']): Promise<SearchResult> {
+export async function searchReference(reference: SearchResult['reference'], versionId?: string): Promise<SearchResult> {
   if (!reference) {
     return { type: 'reference', verses: [] };
   }
@@ -152,6 +152,11 @@ export async function searchReference(reference: SearchResult['reference']): Pro
       `)
       .eq('chapters.books.name', reference.book)
       .eq('chapters.chapter_number', reference.chapter);
+
+    // Filter by version if provided
+    if (versionId) {
+      query = query.eq('version_id', versionId);
+    }
 
     if (reference.verses && reference.verses.length > 0) {
       query = query.in('verse_number', reference.verses);
@@ -186,13 +191,13 @@ export async function searchReference(reference: SearchResult['reference']): Pro
 }
 
 // Search for text using full-text search
-export async function searchText(searchTerm: string): Promise<SearchResult> {
+export async function searchText(searchTerm: string, versionId?: string): Promise<SearchResult> {
   if (!searchTerm.trim()) {
     return { type: 'text', verses: [] };
   }
 
   try {
-    const { data, error } = await (supabase as any)
+    let query = (supabase as any)
       .from('verses')
       .select(`
         id,
@@ -209,6 +214,13 @@ export async function searchText(searchTerm: string): Promise<SearchResult> {
       `)
       .textSearch('text_search', searchTerm, { type: 'websearch' })
       .limit(50);
+
+    // Filter by version if provided
+    if (versionId) {
+      query = query.eq('version_id', versionId);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error('Text search error:', error);
@@ -236,7 +248,7 @@ export async function searchText(searchTerm: string): Promise<SearchResult> {
 }
 
 // Main search function that determines search type
-export async function performSearch(query: string): Promise<SearchResult> {
+export async function performSearch(query: string, versionId?: string): Promise<SearchResult> {
   if (!query.trim()) {
     return { type: 'text', verses: [] };
   }
@@ -244,9 +256,9 @@ export async function performSearch(query: string): Promise<SearchResult> {
   // Try to parse as Bible reference first
   const reference = parseBibleReference(query);
   if (reference) {
-    return await searchReference(reference);
+    return await searchReference(reference, versionId);
   }
 
   // Otherwise, perform text search
-  return await searchText(query);
+  return await searchText(query, versionId);
 }

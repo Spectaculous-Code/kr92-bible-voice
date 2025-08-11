@@ -6,8 +6,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Search, ChevronDown, Menu as MenuIcon } from "lucide-react";
 import { getBibleBooks, getBookChapters, BibleBook } from "@/lib/bibleService";
 import { performSearch, SearchResult } from "@/lib/searchService";
+import { supabase } from "@/integrations/supabase/client";
 import SearchResults from "./SearchResults";
 import { useToast } from "@/components/ui/use-toast";
+
+interface BibleVersion {
+  id: string;
+  name: string;
+  code: string;
+}
 
 interface HeaderProps {
   selectedBook: string;
@@ -19,6 +26,8 @@ interface HeaderProps {
 
 const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, onVerseNavigation }: HeaderProps) => {
   const [bibleBooks, setBibleBooks] = useState<BibleBook[]>([]);
+  const [bibleVersions, setBibleVersions] = useState<BibleVersion[]>([]);
+  const [selectedVersion, setSelectedVersion] = useState<string>("");
   const [chaptersCount, setChaptersCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,12 +36,25 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, 
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      const books = await getBibleBooks();
+    const fetchInitialData = async () => {
+      const [books, versionsResult] = await Promise.all([
+        getBibleBooks(),
+        supabase.from('bible_versions').select('id, name, code').eq('is_active', true).order('name')
+      ]);
+      
       setBibleBooks(books);
+      
+      if (versionsResult.data) {
+        setBibleVersions(versionsResult.data);
+        // Set first version as default
+        if (versionsResult.data.length > 0) {
+          setSelectedVersion(versionsResult.data[0].id);
+        }
+      }
+      
       setLoading(false);
     };
-    fetchBooks();
+    fetchInitialData();
   }, []);
 
   useEffect(() => {
@@ -55,7 +77,7 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, 
 
     setIsSearching(true);
     try {
-      const results = await performSearch(query);
+      const results = await performSearch(query, selectedVersion);
       setSearchResults(results);
     } catch (error) {
       console.error('Search error:', error);
@@ -133,7 +155,18 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, 
             </SelectContent>
           </Select>
 
-          <span className="text-sm text-muted-foreground bg-muted px-2 py-1 rounded">KR92</span>
+          <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Versio" />
+            </SelectTrigger>
+            <SelectContent>
+              {bibleVersions.map((version) => (
+                <SelectItem key={version.id} value={version.id}>
+                  {version.code}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Center - Search */}
