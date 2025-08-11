@@ -26,6 +26,7 @@ const VerseHighlighter = ({
 
   return (
     <div 
+      id={`verse-${verse.number}`}
       className={`
         group relative p-3 rounded-lg transition-all duration-200 cursor-pointer
         ${isCurrentVerse ? 'bg-primary/10 border border-primary/20' : ''}

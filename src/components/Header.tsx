@@ -14,9 +14,10 @@ interface HeaderProps {
   selectedChapter: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
+  onVerseNavigation: (book: string, chapter: number, verse?: number) => void;
 }
 
-const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }: HeaderProps) => {
+const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, onVerseNavigation }: HeaderProps) => {
   const [bibleBooks, setBibleBooks] = useState<BibleBook[]>([]);
   const [chaptersCount, setChaptersCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -75,8 +76,7 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
   };
 
   const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
-    onBookSelect(bookName);
-    onChapterSelect(chapter);
+    onVerseNavigation(bookName, chapter, verse);
     setSearchResults(null);
     setSearchQuery("");
     toast({

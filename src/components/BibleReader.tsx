@@ -9,11 +9,12 @@ import VerseHighlighter from "./VerseHighlighter";
 interface BibleReaderProps {
   book: string;
   chapter: number;
+  targetVerse?: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
 }
 
-const BibleReader = ({ book, chapter, onBookSelect, onChapterSelect }: BibleReaderProps) => {
+const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect }: BibleReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
@@ -33,6 +34,23 @@ const BibleReader = ({ book, chapter, onBookSelect, onChapterSelect }: BibleRead
 
     fetchChapterData();
   }, [book, chapter]);
+
+  // Set current verse when targetVerse changes
+  useEffect(() => {
+    if (targetVerse && chapterData) {
+      setCurrentVerse(targetVerse);
+      // Scroll to the verse after a short delay to ensure it's rendered
+      setTimeout(() => {
+        const verseElement = document.getElementById(`verse-${targetVerse}`);
+        if (verseElement) {
+          verseElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
+    }
+  }, [targetVerse, chapterData]);
 
   const togglePlayback = () => {
     if (isPlaying) {
