@@ -18,17 +18,17 @@ export interface SearchResult {
   };
 }
 
-// Parse Bible references like "1.Joh.1:2-5", "1Joh 2-5", "1 Joh. 2-5"
+// Parse Bible references like "1.Joh.1:2-5", "1Joh 2-5", "1 Johannes. 2-5"
 export function parseBibleReference(query: string): SearchResult['reference'] | null {
   // Clean the query
   const cleaned = query.trim().replace(/\s+/g, ' ');
   
   // Pattern for Bible references
   const patterns = [
-    // "1.Joh.1:2-5" or "1 Joh. 1:2-5"
-    /^(\d*\.?\s*\w+\.?)\s*(\d+):(\d+)(?:-(\d+))?$/i,
-    // "1Joh 2-5" or "Joh 2-5"
-    /^(\d*\.?\s*\w+\.?)\s*(\d+)(?:-(\d+))?$/i,
+    // "1.Joh.1:2-5" or "1 Joh. 1:2-5" or "1 Johannes. 1:2-5"
+    /^(\d*\.?\s*[\w\s]+\.?)\s*(\d+):(\d+)(?:-(\d+))?$/i,
+    // "1Joh 2-5" or "Joh 2-5" or "1 Johannes 2-5"
+    /^(\d*\.?\s*[\w\s]+\.?)\s*(\d+)(?:-(\d+))?$/i,
   ];
 
   for (const pattern of patterns) {
@@ -62,38 +62,66 @@ export function parseBibleReference(query: string): SearchResult['reference'] | 
 // Normalize book names to match database
 function normalizeBookName(bookPart: string): string {
   const bookMappings: Record<string, string> = {
-    '1joh': '1. Johannes',
-    '2joh': '2. Johannes', 
-    '3joh': '3. Johannes',
-    'joh': 'Johannes',
-    '1moos': '1. Mooses',
-    '2moos': '2. Mooses',
-    '3moos': '3. Mooses',
-    '4moos': '4. Mooses',
-    '5moos': '5. Mooses',
-    'matt': 'Matteus',
-    'mark': 'Markus',
-    'luuk': 'Luukas',
-    'apt': 'Apostolien teot',
-    'room': 'Roomalaiset',
-    '1kor': '1. Korinttilaiset',
-    '2kor': '2. Korinttilaiset',
-    'gal': 'Galatalaiset',
-    'ef': 'Efesolaiset',
-    'fil': 'Filippiläiset',
-    'kol': 'Kolossalaiset',
-    '1tess': '1. Tessalonikalaiset',
-    '2tess': '2. Tessalonikalaiset',
-    '1tim': '1. Timoteus',
-    '2tim': '2. Timoteus',
+    // Finnish/German abbreviations to English book names
+    '1joh': 'I John',
+    '2joh': 'II John', 
+    '3joh': 'III John',
+    'joh': 'John',
+    'johannes': 'John',
+    '1johannes': 'I John',
+    '2johannes': 'II John',
+    '3johannes': 'III John',
+    '1moos': 'Genesis',
+    '2moos': 'Exodus',
+    '3moos': 'Leviticus',
+    '4moos': 'Numbers',
+    '5moos': 'Deuteronomy',
+    'matt': 'Matthew',
+    'matteus': 'Matthew',
+    'mark': 'Mark',
+    'markus': 'Mark',
+    'luuk': 'Luke',
+    'luukas': 'Luke',
+    'apt': 'Acts',
+    'apostolienteot': 'Acts',
+    'room': 'Romans',
+    'roomalaiset': 'Romans',
+    '1kor': 'I Corinthians',
+    '2kor': 'II Corinthians',
+    '1korinttilaiset': 'I Corinthians',
+    '2korinttilaiset': 'II Corinthians',
+    'gal': 'Galatians',
+    'galatalaiset': 'Galatians',
+    'ef': 'Ephesians',
+    'efesolaiset': 'Ephesians',
+    'fil': 'Philippians',
+    'filippiläiset': 'Philippians',
+    'kol': 'Colossians',
+    'kolossalaiset': 'Colossians',
+    '1tess': 'I Thessalonians',
+    '2tess': 'II Thessalonians',
+    '1tessalonikalaiset': 'I Thessalonians',
+    '2tessalonikalaiset': 'II Thessalonians',
+    '1tim': 'I Timothy',
+    '2tim': 'II Timothy',
+    '1timoteus': 'I Timothy',
+    '2timoteus': 'II Timothy',
     'tit': 'Titus',
-    'filem': 'Filemon',
-    'hebr': 'Heprealaiset',
-    'jaak': 'Jaakob',
-    '1piet': '1. Pietari',
-    '2piet': '2. Pietari',
-    'juud': 'Juuda',
-    'ilm': 'Ilmestys'
+    'titus': 'Titus',
+    'filem': 'Philemon',
+    'filemon': 'Philemon',
+    'hebr': 'Hebrews',
+    'heprealaiset': 'Hebrews',
+    'jaak': 'James',
+    'jaakob': 'James',
+    '1piet': 'I Peter',
+    '2piet': 'II Peter',
+    '1pietari': 'I Peter',
+    '2pietari': 'II Peter',
+    'juud': 'Jude',
+    'juuda': 'Jude',
+    'ilm': 'Revelation of John',
+    'ilmestys': 'Revelation of John'
   };
 
   const normalized = bookPart.toLowerCase().replace(/\s/g, '');
