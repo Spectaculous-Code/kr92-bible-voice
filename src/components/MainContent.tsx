@@ -156,14 +156,40 @@ const MainContent = ({
           {/* Bible Location and Version */}
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-semibold">
-                {selectedBook} {selectedChapter}
-              </h1>
+              {/* Book Selection */}
+              <Select value={selectedBook} onValueChange={onBookSelect}>
+                <SelectTrigger className="w-[150px]">
+                  <SelectValue placeholder="Valitse kirja" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {bibleBooks.map((book) => (
+                    <SelectItem key={book.name} value={book.name}>
+                      {book.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Chapter Selection */}
+              <Select value={selectedChapter.toString()} onValueChange={(value) => onChapterSelect(parseInt(value))}>
+                <SelectTrigger className="w-[80px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover z-50">
+                  {Array.from({ length: bibleBooks.find(b => b.name === selectedBook)?.chapters_count || 0 }, (_, i) => i + 1).map((chapter) => (
+                    <SelectItem key={chapter} value={chapter.toString()}>
+                      {chapter}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Version Selection */}
               <Select value={selectedVersion} onValueChange={setSelectedVersion}>
                 <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Versio" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-popover z-50">
                   {bibleVersions.map((version) => (
                     <SelectItem key={version.id} value={version.id}>
                       {version.code}
