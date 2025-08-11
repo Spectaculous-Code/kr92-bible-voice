@@ -219,6 +219,7 @@ export type Database = {
           id: string
           name: string
           testament: Database["public"]["Enums"]["testament_t"]
+          version_id: string | null
         }
         Insert: {
           book_order: number
@@ -228,6 +229,7 @@ export type Database = {
           id?: string
           name: string
           testament: Database["public"]["Enums"]["testament_t"]
+          version_id?: string | null
         }
         Update: {
           book_order?: number
@@ -237,8 +239,17 @@ export type Database = {
           id?: string
           name?: string
           testament?: Database["public"]["Enums"]["testament_t"]
+          version_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "books_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       chapters: {
         Row: {
@@ -555,6 +566,7 @@ export type Database = {
           id: string
           osis: string
           verse_number: number
+          version_id: string | null
         }
         Insert: {
           book_id: string
@@ -562,6 +574,7 @@ export type Database = {
           id?: string
           osis: string
           verse_number: number
+          version_id?: string | null
         }
         Update: {
           book_id?: string
@@ -569,6 +582,7 @@ export type Database = {
           id?: string
           osis?: string
           verse_number?: number
+          version_id?: string | null
         }
         Relationships: [
           {
@@ -591,6 +605,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "chapter_verses_user_v"
             referencedColumns: ["book_id"]
+          },
+          {
+            foreignKeyName: "verse_keys_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "bible_versions"
+            referencedColumns: ["id"]
           },
         ]
       }
