@@ -90,7 +90,7 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarGroupLabel className="text-primary font-semibold">
             <Book className="mr-2 h-4 w-4" />
-            {!collapsed && "RAAMATTU"}
+            {!collapsed && "RAAMATTUNI"}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -198,7 +198,7 @@ export function AppSidebar({
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={onNavigateToHighlights}>
                   <Highlighter className="h-4 w-4" />
-                  {!collapsed && <span>Korostukset</span>}
+                  {!collapsed && <span>Korostukseni</span>}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
