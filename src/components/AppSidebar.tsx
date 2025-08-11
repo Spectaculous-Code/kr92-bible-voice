@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { 
   Book, 
   Search, 
@@ -28,6 +29,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { getFinnishBookName } from "@/lib/bookNameMapping";
 
 interface AppSidebarProps {
   onNavigateToSearch: (query: string) => void;
@@ -48,7 +51,75 @@ export function AppSidebar({
   const collapsed = state === "collapsed";
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchHistory, setShowSearchHistory] = useState(false);
+  const [lastAudioPosition, setLastAudioPosition] = useState<string>("Ei viimeisintä");
+  const [lastTextPosition, setLastTextPosition] = useState<string>("Ei viimeisintä");
+  const [summariesCount, setSummariesCount] = useState(0);
+  const [highlightsCount, setHighlightsCount] = useState(0);
   const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Fetch last audio position
+      const { data: audioHistory } = await supabase
+        .from('user_reading_history')
+        .select(`
+          chapter_number,
+          verse_number,
+          books!inner(name)
+        `)
+        .eq('user_id', user.id)
+        .eq('history_type', 'audio')
+        .order('last_read_at', { ascending: false })
+        .limit(1);
+
+      if (audioHistory && audioHistory.length > 0) {
+        const record = audioHistory[0];
+        const bookName = getFinnishBookName(record.books.name);
+        setLastAudioPosition(`${bookName} ${record.chapter_number}:${record.verse_number}`);
+      }
+
+      // Fetch last text position
+      const { data: textHistory } = await supabase
+        .from('user_reading_history')
+        .select(`
+          chapter_number,
+          verse_number,
+          books!inner(name)
+        `)
+        .eq('user_id', user.id)
+        .eq('history_type', 'read')
+        .order('last_read_at', { ascending: false })
+        .limit(1);
+
+      if (textHistory && textHistory.length > 0) {
+        const record = textHistory[0];
+        const bookName = getFinnishBookName(record.books.name);
+        setLastTextPosition(`${bookName} ${record.chapter_number}:${record.verse_number}`);
+      }
+
+      // Fetch summaries count (using user_markings table with marking_type 'summary')
+      const { count: summariesCountResult } = await supabase
+        .from('user_markings')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('marking_type', 'summary');
+
+      setSummariesCount(summariesCountResult || 0);
+
+      // Fetch highlights count
+      const { count: highlightsCountResult } = await supabase
+        .from('highlights')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      setHighlightsCount(highlightsCountResult || 0);
+    };
+
+    fetchUserData();
+  }, []);
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -150,18 +221,32 @@ export function AppSidebar({
 
               {/* Continue Audio */}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={onNavigateToContinueAudio}>
-                  <Play className="h-4 w-4" />
-                  {!collapsed && <span>Jatka kuuntelua</span>}
-                </SidebarMenuButton>
+                <div className="space-y-1">
+                  <SidebarMenuButton onClick={onNavigateToContinueAudio}>
+                    <Play className="h-4 w-4" />
+                    {!collapsed && <span>Jatka kuuntelua</span>}
+                  </SidebarMenuButton>
+                  {!collapsed && (
+                    <div className="ml-8 text-xs text-muted-foreground">
+                      {lastAudioPosition}
+                    </div>
+                  )}
+                </div>
               </SidebarMenuItem>
 
               {/* Continue Text */}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={onNavigateToContinueText}>
-                  <FileText className="h-4 w-4" />
-                  {!collapsed && <span>Jatka lukemista</span>}
-                </SidebarMenuButton>
+                <div className="space-y-1">
+                  <SidebarMenuButton onClick={onNavigateToContinueText}>
+                    <FileText className="h-4 w-4" />
+                    {!collapsed && <span>Jatka lukemista</span>}
+                  </SidebarMenuButton>
+                  {!collapsed && (
+                    <div className="ml-8 text-xs text-muted-foreground">
+                      {lastTextPosition}
+                    </div>
+                  )}
+                </div>
               </SidebarMenuItem>
 
               {/* Continue Reading Program */}
@@ -188,18 +273,32 @@ export function AppSidebar({
             <SidebarMenu>
               {/* My Summaries */}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={onNavigateToSummaries}>
-                  <FileText className="h-4 w-4" />
-                  {!collapsed && <span>Koosteeni</span>}
-                </SidebarMenuButton>
+                <div className="space-y-1">
+                  <SidebarMenuButton onClick={onNavigateToSummaries}>
+                    <FileText className="h-4 w-4" />
+                    {!collapsed && <span>Koosteeni</span>}
+                  </SidebarMenuButton>
+                  {!collapsed && (
+                    <div className="ml-8 text-xs text-muted-foreground">
+                      {summariesCount} kpl
+                    </div>
+                  )}
+                </div>
               </SidebarMenuItem>
 
               {/* Highlights */}
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={onNavigateToHighlights}>
-                  <Highlighter className="h-4 w-4" />
-                  {!collapsed && <span>Korostukseni</span>}
-                </SidebarMenuButton>
+                <div className="space-y-1">
+                  <SidebarMenuButton onClick={onNavigateToHighlights}>
+                    <Highlighter className="h-4 w-4" />
+                    {!collapsed && <span>Korostukseni</span>}
+                  </SidebarMenuButton>
+                  {!collapsed && (
+                    <div className="ml-8 text-xs text-muted-foreground">
+                      {highlightsCount} kpl
+                    </div>
+                  )}
+                </div>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
