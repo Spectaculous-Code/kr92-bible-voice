@@ -49,7 +49,7 @@ const Index = () => {
     setCurrentView('highlights');
   };
 
-  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
+  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number, text?: string) => {
     setSelectedBook(bookName);
     setSelectedChapter(chapter);
     setTargetVerse(verse);

@@ -6,7 +6,7 @@ import { SearchResult } from "@/lib/searchService";
 interface SearchResultsProps {
   results: SearchResult | null;
   onClose: () => void;
-  onNavigateToVerse: (bookName: string, chapter: number, verse?: number) => void;
+  onNavigateToVerse: (bookName: string, chapter: number, verse?: number, text?: string) => void;
   isLoading: boolean;
 }
 
@@ -46,7 +46,7 @@ const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading }: Searc
                 <Card 
                   key={verse.id} 
                   className="p-4 cursor-pointer hover:bg-accent transition-colors"
-                  onClick={() => onNavigateToVerse(verse.book_name, verse.chapter_number, verse.verse_number)}
+                  onClick={() => onNavigateToVerse(verse.book_name, verse.chapter_number, verse.verse_number, verse.text)}
                 >
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
@@ -62,7 +62,7 @@ const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading }: Searc
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
-                        onNavigateToVerse(verse.book_name, verse.chapter_number, verse.verse_number);
+                        onNavigateToVerse(verse.book_name, verse.chapter_number, verse.verse_number, verse.text);
                       }}
                     >
                       Siirry

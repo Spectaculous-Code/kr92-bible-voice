@@ -23,7 +23,7 @@ interface MainContentProps {
   targetVerse?: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
-  onNavigateToVerse: (bookName: string, chapter: number, verse?: number) => void;
+  onNavigateToVerse: (bookName: string, chapter: number, verse?: number, text?: string) => void;
   onVerseSelect: (bookName: string, chapter: number, verse: number, text: string) => void;
   currentView: 'bible' | 'search' | 'summaries' | 'highlights';
   searchQuery?: string;
@@ -92,12 +92,11 @@ const MainContent = ({
     }
   };
 
-  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
+  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number, text?: string) => {
     onNavigateToVerse(bookName, chapter, verse);
     // Also set it as selected verse if verse is specified
-    if (verse) {
-      // We'll need to get the verse text - for now using placeholder
-      onVerseSelect(bookName, chapter, verse, "Valittu jae hakutuloksista");
+    if (verse && text) {
+      onVerseSelect(bookName, chapter, verse, text);
     }
     toast({
       title: "Siirretty",
