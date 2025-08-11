@@ -6,6 +6,7 @@ import BibleReader from "./BibleReader";
 import SearchResults from "./SearchResults";
 import { performSearch, SearchResult } from "@/lib/searchService";
 import { getBibleBooks, BibleBook } from "@/lib/bibleService";
+import { getFinnishBookName, getEnglishBookName } from "@/lib/bookNameMapping";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect } from "react";
@@ -92,7 +93,7 @@ const MainContent = ({
     onChapterSelect(chapter);
     toast({
       title: "Siirretty",
-      description: `${bookName} ${chapter}${verse ? `:${verse}` : ''}`,
+      description: `${getFinnishBookName(bookName)} ${chapter}${verse ? `:${verse}` : ''}`,
     });
   };
 
@@ -100,7 +101,7 @@ const MainContent = ({
     setIsPlaying(!isPlaying);
     toast({
       title: isPlaying ? "Toisto pysäytetty" : "Toisto aloitettu",
-      description: `${selectedBook} ${selectedChapter}`,
+      description: `${getFinnishBookName(selectedBook)} ${selectedChapter}`,
     });
   };
 
@@ -158,13 +159,15 @@ const MainContent = ({
             <div className="flex items-center gap-2">
               {/* Book Selection */}
               <Select value={selectedBook} onValueChange={onBookSelect}>
-                <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="Valitse kirja" />
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Valitse kirja">
+                    {selectedBook ? getFinnishBookName(selectedBook) : "Valitse kirja"}
+                  </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-popover z-50">
                   {bibleBooks.map((book) => (
                     <SelectItem key={book.name} value={book.name}>
-                      {book.name}
+                      {getFinnishBookName(book.name)}
                     </SelectItem>
                   ))}
                 </SelectContent>
