@@ -175,15 +175,8 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
-      {/* Chapter Header */}
-      <div className="text-center space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">{book}</h1>
-        <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
-      </div>
-
-
-      {/* Chapter Navigation - Top */}
-      <div className="flex justify-between">
+      {/* Chapter Header with Navigation */}
+      <div className="flex items-center justify-between">
         <Button 
           variant="outline" 
           onClick={() => navigateChapter('prev')}
@@ -192,6 +185,11 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
           <SkipBack className="h-4 w-4" />
           Edellinen luku
         </Button>
+        
+        <div className="text-center space-y-2">
+          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
+        </div>
         
         <Button 
           variant="outline" 
@@ -202,6 +200,8 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
           <SkipForward className="h-4 w-4" />
         </Button>
       </div>
+
+
 
       {/* Bible Text */}
       <Card className="p-6">
