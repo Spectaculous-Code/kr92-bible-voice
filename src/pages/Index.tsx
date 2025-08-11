@@ -20,7 +20,8 @@ const Index = () => {
     setTargetVerse(undefined);
   };
 
-  const handleNavigateToSearch = () => {
+  const handleNavigateToSearch = (query: string) => {
+    setSearchQuery(query);
     setCurrentView('search');
   };
 

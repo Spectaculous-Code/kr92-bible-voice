@@ -30,7 +30,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useToast } from "@/components/ui/use-toast";
 
 interface AppSidebarProps {
-  onNavigateToSearch: () => void;
+  onNavigateToSearch: (query: string) => void;
   onNavigateToContinueAudio: () => void;
   onNavigateToContinueText: () => void;
   onNavigateToSummaries: () => void;
@@ -52,7 +52,7 @@ export function AppSidebar({
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
-      onNavigateToSearch();
+      onNavigateToSearch(searchQuery.trim());
       toast({
         title: "Haku käynnistetty",
         description: `Haetaan: "${searchQuery}"`,
@@ -134,7 +134,7 @@ export function AppSidebar({
                               className="w-full justify-start h-7 text-xs"
                               onClick={() => {
                                 setSearchQuery(item);
-                                handleSearch();
+                                onNavigateToSearch(item);
                               }}
                             >
                               <History className="mr-2 h-3 w-3" />
