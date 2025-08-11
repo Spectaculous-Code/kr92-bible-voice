@@ -19,6 +19,8 @@ const Index = () => {
         <BibleReader 
           book={selectedBook}
           chapter={selectedChapter}
+          onBookSelect={setSelectedBook}
+          onChapterSelect={setSelectedChapter}
         />
       </main>
     </div>

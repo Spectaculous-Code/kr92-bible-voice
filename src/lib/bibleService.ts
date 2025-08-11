@@ -148,3 +148,87 @@ export const getBookChapters = async (bookName: string): Promise<number> => {
 
   return data?.chapters_count || 0;
 };
+
+// Get next chapter data (book and chapter number)
+export const getNextChapter = async (currentBookName: string, currentChapter: number): Promise<{book: string, chapter: number} | null> => {
+  // First get the current book
+  const { data: currentBook, error: bookError } = await supabase
+    .from('books')
+    .select('id, chapters_count, book_order')
+    .eq('name', currentBookName)
+    .single();
+
+  if (bookError || !currentBook) {
+    console.error('Error fetching current book:', bookError);
+    return null;
+  }
+
+  // If there's a next chapter in the same book
+  if (currentChapter < currentBook.chapters_count) {
+    return {
+      book: currentBookName,
+      chapter: currentChapter + 1
+    };
+  }
+
+  // Otherwise, get the next book
+  const { data: nextBook, error: nextBookError } = await supabase
+    .from('books')
+    .select('name, chapters_count')
+    .gt('book_order', currentBook.book_order)
+    .order('book_order')
+    .limit(1)
+    .single();
+
+  if (nextBookError || !nextBook) {
+    // No next book available
+    return null;
+  }
+
+  return {
+    book: nextBook.name,
+    chapter: 1
+  };
+};
+
+// Get previous chapter data (book and chapter number)
+export const getPreviousChapter = async (currentBookName: string, currentChapter: number): Promise<{book: string, chapter: number} | null> => {
+  // First get the current book
+  const { data: currentBook, error: bookError } = await supabase
+    .from('books')
+    .select('id, chapters_count, book_order')
+    .eq('name', currentBookName)
+    .single();
+
+  if (bookError || !currentBook) {
+    console.error('Error fetching current book:', bookError);
+    return null;
+  }
+
+  // If there's a previous chapter in the same book
+  if (currentChapter > 1) {
+    return {
+      book: currentBookName,
+      chapter: currentChapter - 1
+    };
+  }
+
+  // Otherwise, get the previous book
+  const { data: prevBook, error: prevBookError } = await supabase
+    .from('books')
+    .select('name, chapters_count')
+    .lt('book_order', currentBook.book_order)
+    .order('book_order', { ascending: false })
+    .limit(1)
+    .single();
+
+  if (prevBookError || !prevBook) {
+    // No previous book available
+    return null;
+  }
+
+  return {
+    book: prevBook.name,
+    chapter: prevBook.chapters_count
+  };
+};

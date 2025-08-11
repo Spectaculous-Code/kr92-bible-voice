@@ -3,15 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { getChapterData, ChapterWithVerses } from "@/lib/bibleService";
+import { getChapterData, ChapterWithVerses, getNextChapter, getPreviousChapter } from "@/lib/bibleService";
 import VerseHighlighter from "./VerseHighlighter";
 
 interface BibleReaderProps {
   book: string;
   chapter: number;
+  onBookSelect: (book: string) => void;
+  onChapterSelect: (chapter: number) => void;
 }
 
-const BibleReader = ({ book, chapter }: BibleReaderProps) => {
+const BibleReader = ({ book, chapter, onBookSelect, onChapterSelect }: BibleReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
@@ -91,11 +93,38 @@ const BibleReader = ({ book, chapter }: BibleReaderProps) => {
     setBookmarks(newBookmarks);
   };
 
-  const navigateChapter = (direction: 'prev' | 'next') => {
-    toast({
-      title: direction === 'prev' ? "Edellinen luku" : "Seuraava luku",
-      description: "Navigointi tulossa pian...",
-    });
+  const navigateChapter = async (direction: 'prev' | 'next') => {
+    try {
+      let navigationData;
+      
+      if (direction === 'next') {
+        navigationData = await getNextChapter(book, chapter);
+      } else {
+        navigationData = await getPreviousChapter(book, chapter);
+      }
+      
+      if (navigationData) {
+        onBookSelect(navigationData.book);
+        onChapterSelect(navigationData.chapter);
+        toast({
+          title: direction === 'prev' ? "Edellinen luku" : "Seuraava luku",
+          description: `${navigationData.book} ${navigationData.chapter}`,
+        });
+      } else {
+        toast({
+          title: "Ei voida siirtyä",
+          description: direction === 'prev' ? "Tämä on ensimmäinen luku" : "Tämä on viimeinen luku",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Navigation error:', error);
+      toast({
+        title: "Navigointivirhe",
+        description: "Luvun vaihtaminen epäonnistui",
+        variant: "destructive"
+      });
+    }
   };
 
   if (loading) {
