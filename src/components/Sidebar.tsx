@@ -48,14 +48,14 @@ const Sidebar = ({
         
         <ScrollArea className="h-[calc(100vh-80px)] md:h-[calc(100vh-72px)]">
           <div className="p-4 space-y-4">
-            {/* Old Testament */}
+            {/* New Testament */}
             <div>
               <h3 className="font-semibold text-sm text-muted-foreground mb-2 px-2">
-                VANHA TESTAMENTTI
+                UUSI TESTAMENTTI
               </h3>
               <div className="space-y-1">
                 {bibleBooks
-                  .filter(book => book.testament === "old")
+                  .filter(book => book.testament === "new")
                   .map((book) => (
                     <Button
                       key={book.name}
@@ -74,14 +74,14 @@ const Sidebar = ({
 
             <Separator />
 
-            {/* New Testament */}
+            {/* Old Testament */}
             <div>
               <h3 className="font-semibold text-sm text-muted-foreground mb-2 px-2">
-                UUSI TESTAMENTTI
+                VANHA TESTAMENTTI
               </h3>
               <div className="space-y-1">
                 {bibleBooks
-                  .filter(book => book.testament === "new")
+                  .filter(book => book.testament === "old")
                   .map((book) => (
                     <Button
                       key={book.name}
