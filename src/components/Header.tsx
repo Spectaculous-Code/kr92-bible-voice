@@ -5,6 +5,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Search, ChevronDown, Menu as MenuIcon } from "lucide-react";
 import { getBibleBooks, getBookChapters, BibleBook } from "@/lib/bibleService";
+import { performSearch, SearchResult } from "@/lib/searchService";
+import SearchResults from "./SearchResults";
+import { useToast } from "@/components/ui/use-toast";
 
 interface HeaderProps {
   selectedBook: string;
@@ -17,6 +20,10 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
   const [bibleBooks, setBibleBooks] = useState<BibleBook[]>([]);
   const [chaptersCount, setChaptersCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -38,6 +45,45 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
   }, [selectedBook]);
 
   const chapters = Array.from({ length: chaptersCount }, (_, i) => i + 1);
+
+  const handleSearch = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults(null);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const results = await performSearch(query);
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+      toast({
+        title: "Hakuvirhe",
+        description: "Haku epäonnistui, yritä uudelleen",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch(searchQuery);
+    }
+  };
+
+  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
+    onBookSelect(bookName);
+    onChapterSelect(chapter);
+    setSearchResults(null);
+    setSearchQuery("");
+    toast({
+      title: "Siirretty",
+      description: `${bookName} ${chapter}${verse ? `:${verse}` : ''}`,
+    });
+  };
 
   return (
     <header className="bg-card border-b border-border sticky top-0 z-50">
@@ -95,9 +141,23 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Etsi jakeita..."
+              placeholder="Etsi jakeita tai viittauksia (esim. parannus, 1.Joh.1:2-5)..."
               className="pl-10"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={handleKeyPress}
             />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                onClick={() => handleSearch(searchQuery)}
+                disabled={isSearching}
+              >
+                <Search className="h-3 w-3" />
+              </Button>
+            )}
           </div>
         </div>
 
@@ -116,6 +176,17 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect }
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      
+      {/* Search Results */}
+      <SearchResults
+        results={searchResults}
+        onClose={() => {
+          setSearchResults(null);
+          setSearchQuery("");
+        }}
+        onNavigateToVerse={handleNavigateToVerse}
+        isLoading={isSearching}
+      />
     </header>
   );
 };
