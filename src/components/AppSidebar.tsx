@@ -74,7 +74,7 @@ export function AppSidebar({
   ];
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-80"} collapsible="icon">
+    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarHeader className="border-b border-border p-4">
         {!collapsed && (
           <h1 className="text-lg font-semibold text-foreground">Raamattusovelus</h1>
