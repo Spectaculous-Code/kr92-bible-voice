@@ -145,6 +145,7 @@ const MainContent = ({
             targetVerse={targetVerse}
             onBookSelect={onBookSelect}
             onChapterSelect={onChapterSelect}
+            showNextChapterInfo={false}
           />
         );
     }

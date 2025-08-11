@@ -14,9 +14,10 @@ interface BibleReaderProps {
   targetVerse?: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
+  showNextChapterInfo?: boolean;
 }
 
-const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect }: BibleReaderProps) => {
+const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect, showNextChapterInfo = true }: BibleReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
@@ -36,8 +37,8 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       setChapterData(data);
       setLoading(false);
       
-      // Only show next chapter info if not navigating programmatically
-      if (data && !isNavigating) {
+      // Only show next chapter info if explicitly enabled and not navigating programmatically
+      if (data && showNextChapterInfo && !isNavigating) {
         const totalChapters = await getBookChapters(book);
         const nextChapterInfo = generateNextChapterInfo(
           book, 
