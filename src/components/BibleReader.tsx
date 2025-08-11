@@ -14,10 +14,11 @@ interface BibleReaderProps {
   targetVerse?: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
+  onVerseSelect: (bookName: string, chapter: number, verse: number, text: string) => void;
   showNextChapterInfo?: boolean;
 }
 
-const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect, showNextChapterInfo = true }: BibleReaderProps) => {
+const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect, onVerseSelect, showNextChapterInfo = true }: BibleReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
@@ -237,7 +238,10 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
               isHighlighted={highlights.has(verse.verse_number)}
               isCurrentVerse={currentVerse === verse.verse_number}
               onHighlight={() => toggleHighlight(verse.verse_number)}
-              onVerseClick={() => setCurrentVerse(verse.verse_number)}
+              onVerseClick={() => {
+                setCurrentVerse(verse.verse_number);
+                onVerseSelect(book, chapter, verse.verse_number, verse.text);
+              }}
             />
           ))}
         </div>

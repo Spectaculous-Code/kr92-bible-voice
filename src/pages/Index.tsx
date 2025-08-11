@@ -9,6 +9,12 @@ const Index = () => {
   const [targetVerse, setTargetVerse] = useState<number | undefined>();
   const [currentView, setCurrentView] = useState<'bible' | 'search' | 'summaries' | 'highlights'>('bible');
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVerse, setSelectedVerse] = useState<{
+    bookName: string;
+    chapter: number;
+    verse: number;
+    text: string;
+  } | null>(null);
 
   const handleBookSelect = (book: string) => {
     setSelectedBook(book);
@@ -50,6 +56,10 @@ const Index = () => {
     setCurrentView('bible');
   };
 
+  const handleVerseSelect = (bookName: string, chapter: number, verse: number, text: string) => {
+    setSelectedVerse({ bookName, chapter, verse, text });
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -60,6 +70,7 @@ const Index = () => {
           onNavigateToContinueText={handleNavigateToContinueText}
           onNavigateToSummaries={handleNavigateToSummaries}
           onNavigateToHighlights={handleNavigateToHighlights}
+          selectedVerse={selectedVerse}
         />
 
         <MainContent
@@ -69,6 +80,7 @@ const Index = () => {
           onBookSelect={handleBookSelect}
           onChapterSelect={handleChapterSelect}
           onNavigateToVerse={handleNavigateToVerse}
+          onVerseSelect={handleVerseSelect}
           currentView={currentView}
           searchQuery={searchQuery}
         />

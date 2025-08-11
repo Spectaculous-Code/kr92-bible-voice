@@ -38,6 +38,12 @@ interface AppSidebarProps {
   onNavigateToContinueText: () => void;
   onNavigateToSummaries: () => void;
   onNavigateToHighlights: () => void;
+  selectedVerse?: {
+    bookName: string;
+    chapter: number;
+    verse: number;
+    text: string;
+  } | null;
 }
 
 export function AppSidebar({
@@ -45,7 +51,8 @@ export function AppSidebar({
   onNavigateToContinueAudio,
   onNavigateToContinueText,
   onNavigateToSummaries,
-  onNavigateToHighlights
+  onNavigateToHighlights,
+  selectedVerse
 }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -285,6 +292,34 @@ export function AppSidebar({
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Fokus Section */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-primary font-semibold">
+            <Star className="mr-2 h-4 w-4" />
+            {!collapsed && "FOKUS"}
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className="px-2">
+              {selectedVerse ? (
+                <div className="border border-border rounded-lg p-3 bg-muted/30">
+                  <div className="text-xs font-medium text-muted-foreground mb-2">
+                    {selectedVerse.bookName} {selectedVerse.chapter}:{selectedVerse.verse}
+                  </div>
+                  <div className="text-sm leading-relaxed text-foreground">
+                    {selectedVerse.text}
+                  </div>
+                </div>
+              ) : (
+                <div className="border border-dashed border-muted-foreground/30 rounded-lg p-3 text-center">
+                  <div className="text-xs text-muted-foreground">
+                    {!collapsed ? "Valitse jae korostettavaksi" : "Ei valintaa"}
+                  </div>
+                </div>
+              )}
+            </div>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
