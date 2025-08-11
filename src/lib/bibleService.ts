@@ -51,11 +51,25 @@ export const getBibleVersions = async (): Promise<BibleVersion[]> => {
   return data || [];
 };
 
-// Get all books
-export const getBibleBooks = async (): Promise<BibleBook[]> => {
-  const { data, error } = await supabase
+// Get all books for the default version
+export const getBibleBooks = async (versionCode: string = 'finprfinni'): Promise<BibleBook[]> => {
+  // First get the version
+  const { data: version, error: versionError } = await supabase
+    .from('bible_versions')
+    .select('id')
+    .eq('code', versionCode)
+    .single();
+
+  if (versionError || !version) {
+    console.error('Error fetching version:', versionError);
+    return [];
+  }
+
+  // Get books for this specific version
+  const { data: rawData, error } = await supabase
     .from('books')
-    .select('*')
+    .select('id, name, testament, chapters_count, book_order')
+    .eq('version_id', version.id)
     .order('book_order');
 
   if (error) {
@@ -63,28 +77,23 @@ export const getBibleBooks = async (): Promise<BibleBook[]> => {
     return [];
   }
 
-  return (data || []).map(book => ({
-    ...book,
-    testament: book.testament as "old" | "new"
+  if (!rawData) return [];
+  
+  const books: BibleBook[] = rawData.map((book: any) => ({
+    id: book.id,
+    name: book.name,
+    testament: book.testament,
+    chapters_count: book.chapters_count,
+    book_order: book.book_order
   }));
+  
+  return books;
 };
 
 // Get chapter with verses
 export const getChapterData = async (bookName: string, chapterNumber: number, versionCode: string = 'finprfinni'): Promise<ChapterWithVerses | null> => {
   try {
-    // First get the book
-    const { data: books, error: bookError } = await supabase
-      .from('books')
-      .select('id')
-      .eq('name', bookName)
-      .single();
-
-    if (bookError || !books) {
-      console.error('Error fetching book:', bookError);
-      return null;
-    }
-
-    // Get the version
+    // Get the version first
     const { data: version, error: versionError } = await supabase
       .from('bible_versions')
       .select('id')
@@ -93,6 +102,19 @@ export const getChapterData = async (bookName: string, chapterNumber: number, ve
 
     if (versionError || !version) {
       console.error('Error fetching version:', versionError);
+      return null;
+    }
+
+    // Get the book for this specific version
+    const { data: books, error: bookError } = await supabase
+      .from('books')
+      .select('id')
+      .eq('name', bookName)
+      .eq('version_id', version.id)
+      .single();
+
+    if (bookError || !books) {
+      console.error('Error fetching book:', bookError);
       return null;
     }
 
@@ -134,11 +156,24 @@ export const getChapterData = async (bookName: string, chapterNumber: number, ve
 };
 
 // Get chapters for a book
-export const getBookChapters = async (bookName: string): Promise<number> => {
+export const getBookChapters = async (bookName: string, versionCode: string = 'finprfinni'): Promise<number> => {
+  // First get the version
+  const { data: version, error: versionError } = await supabase
+    .from('bible_versions')
+    .select('id')
+    .eq('code', versionCode)
+    .single();
+
+  if (versionError || !version) {
+    console.error('Error fetching version:', versionError);
+    return 0;
+  }
+
   const { data, error } = await supabase
     .from('books')
     .select('chapters_count')
     .eq('name', bookName)
+    .eq('version_id', version.id)
     .single();
 
   if (error) {
@@ -150,12 +185,25 @@ export const getBookChapters = async (bookName: string): Promise<number> => {
 };
 
 // Get next chapter data (book and chapter number)
-export const getNextChapter = async (currentBookName: string, currentChapter: number): Promise<{book: string, chapter: number} | null> => {
+export const getNextChapter = async (currentBookName: string, currentChapter: number, versionCode: string = 'finprfinni'): Promise<{book: string, chapter: number} | null> => {
+  // First get the version
+  const { data: version, error: versionError } = await supabase
+    .from('bible_versions')
+    .select('id')
+    .eq('code', versionCode)
+    .single();
+
+  if (versionError || !version) {
+    console.error('Error fetching version:', versionError);
+    return null;
+  }
+
   // First get the current book
   const { data: currentBook, error: bookError } = await supabase
     .from('books')
     .select('id, chapters_count, book_order')
     .eq('name', currentBookName)
+    .eq('version_id', version.id)
     .single();
 
   if (bookError || !currentBook) {
@@ -175,6 +223,7 @@ export const getNextChapter = async (currentBookName: string, currentChapter: nu
   const { data: nextBook, error: nextBookError } = await supabase
     .from('books')
     .select('name, chapters_count')
+    .eq('version_id', version.id)
     .gt('book_order', currentBook.book_order)
     .order('book_order')
     .limit(1)
@@ -192,12 +241,25 @@ export const getNextChapter = async (currentBookName: string, currentChapter: nu
 };
 
 // Get previous chapter data (book and chapter number)
-export const getPreviousChapter = async (currentBookName: string, currentChapter: number): Promise<{book: string, chapter: number} | null> => {
+export const getPreviousChapter = async (currentBookName: string, currentChapter: number, versionCode: string = 'finprfinni'): Promise<{book: string, chapter: number} | null> => {
+  // First get the version
+  const { data: version, error: versionError } = await supabase
+    .from('bible_versions')
+    .select('id')
+    .eq('code', versionCode)
+    .single();
+
+  if (versionError || !version) {
+    console.error('Error fetching version:', versionError);
+    return null;
+  }
+
   // First get the current book
   const { data: currentBook, error: bookError } = await supabase
     .from('books')
     .select('id, chapters_count, book_order')
     .eq('name', currentBookName)
+    .eq('version_id', version.id)
     .single();
 
   if (bookError || !currentBook) {
@@ -217,6 +279,7 @@ export const getPreviousChapter = async (currentBookName: string, currentChapter
   const { data: prevBook, error: prevBookError } = await supabase
     .from('books')
     .select('name, chapters_count')
+    .eq('version_id', version.id)
     .lt('book_order', currentBook.book_order)
     .order('book_order', { ascending: false })
     .limit(1)
