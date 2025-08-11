@@ -273,32 +273,18 @@ export function AppSidebar({
             <SidebarMenu>
               {/* My Summaries */}
               <SidebarMenuItem>
-                <div className="space-y-1">
-                  <SidebarMenuButton onClick={onNavigateToSummaries}>
-                    <FileText className="h-4 w-4" />
-                    {!collapsed && <span>Koosteeni</span>}
-                  </SidebarMenuButton>
-                  {!collapsed && (
-                    <div className="ml-8 text-xs text-muted-foreground">
-                      {summariesCount} kpl
-                    </div>
-                  )}
-                </div>
+                <SidebarMenuButton onClick={onNavigateToSummaries}>
+                  <FileText className="h-4 w-4" />
+                  {!collapsed && <span>Koosteeni ({summariesCount} kpl)</span>}
+                </SidebarMenuButton>
               </SidebarMenuItem>
 
               {/* Highlights */}
               <SidebarMenuItem>
-                <div className="space-y-1">
-                  <SidebarMenuButton onClick={onNavigateToHighlights}>
-                    <Highlighter className="h-4 w-4" />
-                    {!collapsed && <span>Korostukseni</span>}
-                  </SidebarMenuButton>
-                  {!collapsed && (
-                    <div className="ml-8 text-xs text-muted-foreground">
-                      {highlightsCount} kpl
-                    </div>
-                  )}
-                </div>
+                <SidebarMenuButton onClick={onNavigateToHighlights}>
+                  <Highlighter className="h-4 w-4" />
+                  {!collapsed && <span>Korostukseni ({highlightsCount} kpl)</span>}
+                </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
