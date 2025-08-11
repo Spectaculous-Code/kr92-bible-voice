@@ -106,7 +106,12 @@ export const getBibleBooks = async (versionCode: string = 'finprfinni'): Promise
       book_order: book.book_order
     }));
     
-    return books;
+    // Sort books: New Testament first, then Old Testament
+    return books.sort((a, b) => {
+      if (a.testament === 'new' && b.testament === 'old') return -1;
+      if (a.testament === 'old' && b.testament === 'new') return 1;
+      return a.book_order - b.book_order;
+    });
   } catch (error) {
     console.error('Error in getBibleBooks:', error);
     return [];
