@@ -1,48 +1,74 @@
 import { useState } from "react";
-import BibleReader from "@/components/BibleReader";
-import Header from "@/components/Header";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import MainContent from "@/components/MainContent";
 
 const Index = () => {
-  const [selectedBook, setSelectedBook] = useState("Genesis");
+  const [selectedBook, setSelectedBook] = useState("Matteus");
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [targetVerse, setTargetVerse] = useState<number | undefined>();
+  const [currentView, setCurrentView] = useState<'bible' | 'search' | 'summaries' | 'highlights'>('bible');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleBookSelect = (book: string) => {
     setSelectedBook(book);
-    setTargetVerse(undefined); // Clear target verse when book changes
+    setTargetVerse(undefined);
   };
 
   const handleChapterSelect = (chapter: number) => {
     setSelectedChapter(chapter);
-    setTargetVerse(undefined); // Clear target verse when chapter changes
+    setTargetVerse(undefined);
   };
 
-  const handleVerseNavigation = (book: string, chapter: number, verse?: number) => {
-    setSelectedBook(book);
-    setSelectedChapter(chapter);
-    setTargetVerse(verse);
+  const handleNavigateToSearch = () => {
+    setCurrentView('search');
+  };
+
+  const handleNavigateToContinueAudio = () => {
+    setCurrentView('bible');
+    // TODO: Load last audio position
+  };
+
+  const handleNavigateToContinueText = () => {
+    setCurrentView('bible');
+    // TODO: Load last reading position
+  };
+
+  const handleNavigateToSummaries = () => {
+    setCurrentView('summaries');
+  };
+
+  const handleNavigateToHighlights = () => {
+    setCurrentView('highlights');
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header 
-        selectedBook={selectedBook}
-        selectedChapter={selectedChapter}
-        onBookSelect={handleBookSelect}
-        onChapterSelect={handleChapterSelect}
-        onVerseNavigation={handleVerseNavigation}
-      />
-      
-      <main className="w-full">
-        <BibleReader 
-          book={selectedBook}
-          chapter={selectedChapter}
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        {/* Global Sidebar Trigger */}
+        <header className="fixed top-4 left-4 z-50">
+          <SidebarTrigger className="bg-card border border-border shadow-md" />
+        </header>
+
+        <AppSidebar 
+          onNavigateToSearch={handleNavigateToSearch}
+          onNavigateToContinueAudio={handleNavigateToContinueAudio}
+          onNavigateToContinueText={handleNavigateToContinueText}
+          onNavigateToSummaries={handleNavigateToSummaries}
+          onNavigateToHighlights={handleNavigateToHighlights}
+        />
+
+        <MainContent
+          selectedBook={selectedBook}
+          selectedChapter={selectedChapter}
           targetVerse={targetVerse}
           onBookSelect={handleBookSelect}
           onChapterSelect={handleChapterSelect}
+          currentView={currentView}
+          searchQuery={searchQuery}
         />
-      </main>
-    </div>
+      </div>
+    </SidebarProvider>
   );
 };
 
