@@ -25,6 +25,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
   const [loading, setLoading] = useState(true);
   const [showInfoBox, setShowInfoBox] = useState(false);
   const [infoMessage, setInfoMessage] = useState("");
+  const [isNavigating, setIsNavigating] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
@@ -35,8 +36,8 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       setChapterData(data);
       setLoading(false);
       
-      // Show next chapter info
-      if (data) {
+      // Only show next chapter info if not navigating programmatically
+      if (data && !isNavigating) {
         const totalChapters = await getBookChapters(book);
         const nextChapterInfo = generateNextChapterInfo(
           book, 
@@ -48,6 +49,9 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
           setShowInfoBox(true);
         }
       }
+      
+      // Reset navigation flag
+      setIsNavigating(false);
     };
 
     fetchChapterData();
@@ -140,6 +144,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       }
       
       if (navigationData) {
+        setIsNavigating(true);
         onBookSelect(navigationData.book);
         onChapterSelect(navigationData.chapter);
         toast({
