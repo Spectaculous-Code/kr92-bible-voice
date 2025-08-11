@@ -42,10 +42,10 @@ export const englishToFinnishBookNames: Record<string, string> = {
   "Malachi": "Malakian kirja",
 
   // New Testament / Uusi testamentti
-  "Matthew": "Matteuksen evankeliumi",
-  "Mark": "Markuksen evankeliumi",
-  "Luke": "Luukkaan evankeliumi",
-  "John": "Johanneksen evankeliumi",
+  "Matthew": "Matteus",
+  "Mark": "Markus",
+  "Luke": "Luukas",
+  "John": "Johannes",
   "Acts": "Apostolien teot",
   "Romans": "Kirje roomalaisille",
   "I Corinthians": "1. kirje korinttilaisille",
