@@ -45,10 +45,6 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-        {/* Global Sidebar Trigger */}
-        <header className="fixed top-4 left-4 z-50">
-          <SidebarTrigger className="bg-card border border-border shadow-md" />
-        </header>
 
         <AppSidebar 
           onNavigateToSearch={handleNavigateToSearch}
