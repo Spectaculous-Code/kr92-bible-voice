@@ -181,45 +181,6 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
         <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
       </div>
 
-      {/* Audio Controls */}
-      <Card className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon" onClick={() => navigateChapter('prev')}>
-              <SkipBack className="h-4 w-4" />
-            </Button>
-            
-            <Button 
-              size="icon" 
-              onClick={togglePlayback}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
-            </Button>
-            
-            <Button variant="outline" size="icon" onClick={() => navigateChapter('next')}>
-              <SkipForward className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Jae {currentVerse}/{chapterData.verses.length}
-            </span>
-            <Button variant="ghost" size="icon">
-              <Volume2 className="h-4 w-4" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={toggleBookmark}
-              className={bookmarks.has(`${book}_${chapter}`) ? "text-primary" : ""}
-            >
-              <Heart className={bookmarks.has(`${book}_${chapter}`) ? "h-4 w-4 fill-current" : "h-4 w-4"} />
-            </Button>
-          </div>
-        </div>
-      </Card>
 
       {/* Chapter Navigation - Top */}
       <div className="flex justify-between">
