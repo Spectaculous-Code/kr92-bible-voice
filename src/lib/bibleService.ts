@@ -70,7 +70,7 @@ export const getBibleBooks = async (): Promise<BibleBook[]> => {
 };
 
 // Get chapter with verses
-export const getChapterData = async (bookName: string, chapterNumber: number, versionCode: string = 'KR92'): Promise<ChapterWithVerses | null> => {
+export const getChapterData = async (bookName: string, chapterNumber: number, versionCode: string = 'finprfinni'): Promise<ChapterWithVerses | null> => {
   try {
     // First get the book
     const { data: books, error: bookError } = await supabase

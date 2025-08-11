@@ -3,7 +3,7 @@ import BibleReader from "@/components/BibleReader";
 import Header from "@/components/Header";
 
 const Index = () => {
-  const [selectedBook, setSelectedBook] = useState("1. Mooseksen kirja");
+  const [selectedBook, setSelectedBook] = useState("Genesis");
   const [selectedChapter, setSelectedChapter] = useState(1);
 
   return (
