@@ -21,6 +21,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarHeader,
+  SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Input } from "@/components/ui/input";
@@ -77,7 +78,10 @@ export function AppSidebar({
     <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarHeader className="border-b border-border p-4">
         {!collapsed && (
-          <h1 className="text-lg font-semibold text-foreground">Raamattusovelus</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-lg font-semibold text-foreground">Raamattu Nyt</h1>
+            <SidebarTrigger className="h-6 w-6" />
+          </div>
         )}
       </SidebarHeader>
 
