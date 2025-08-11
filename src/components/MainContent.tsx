@@ -164,9 +164,13 @@ const MainContent = ({
                     {selectedBook ? getFinnishBookName(selectedBook) : "Valitse kirja"}
                   </SelectValue>
                 </SelectTrigger>
-                <SelectContent className="bg-popover z-50">
+                <SelectContent className="bg-popover z-50 max-w-[300px]">
                   {bibleBooks.map((book) => (
-                    <SelectItem key={book.name} value={book.name}>
+                    <SelectItem 
+                      key={book.name} 
+                      value={book.name}
+                      className="pl-6 pr-2 text-left"
+                    >
                       {getFinnishBookName(book.name)}
                     </SelectItem>
                   ))}
