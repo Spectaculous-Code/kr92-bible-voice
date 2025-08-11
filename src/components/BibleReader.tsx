@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { getChapterData, ChapterWithVerses, getNextChapter, getPreviousChapter } from "@/lib/bibleService";
+import { getFinnishBookName } from "@/lib/bookNameMapping";
 import VerseHighlighter from "./VerseHighlighter";
 
 interface BibleReaderProps {
@@ -58,14 +59,14 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       // In real app, pause audio
       toast({
         title: "Toisto pysäytetty",
-        description: `${book} ${chapter}`,
+        description: `${getFinnishBookName(book)} ${chapter}`,
       });
     } else {
       setIsPlaying(true);
       // In real app, start audio
       toast({
         title: "Toisto aloitettu",
-        description: `${book} ${chapter}`,
+        description: `${getFinnishBookName(book)} ${chapter}`,
       });
       
       // Simulate verse progression
@@ -79,13 +80,13 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       newHighlights.delete(verseNumber);
       toast({
         title: "Korostus poistettu",
-        description: `${book} ${chapter}:${verseNumber}`,
+        description: `${getFinnishBookName(book)} ${chapter}:${verseNumber}`,
       });
     } else {
       newHighlights.add(verseNumber);
       toast({
         title: "Jae korostettu",
-        description: `${book} ${chapter}:${verseNumber}`,
+        description: `${getFinnishBookName(book)} ${chapter}:${verseNumber}`,
       });
     }
     setHighlights(newHighlights);
@@ -99,13 +100,13 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       newBookmarks.delete(bookmarkKey);
       toast({
         title: "Kirjanmerkki poistettu",
-        description: `${book} ${chapter}`,
+        description: `${getFinnishBookName(book)} ${chapter}`,
       });
     } else {
       newBookmarks.add(bookmarkKey);
       toast({
         title: "Kirjanmerkki lisätty",
-        description: `${book} ${chapter}`,
+        description: `${getFinnishBookName(book)} ${chapter}`,
       });
     }
     setBookmarks(newBookmarks);
@@ -126,7 +127,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
         onChapterSelect(navigationData.chapter);
         toast({
           title: direction === 'prev' ? "Edellinen luku" : "Seuraava luku",
-          description: `${navigationData.book} ${navigationData.chapter}`,
+          description: `${getFinnishBookName(navigationData.book)} ${navigationData.chapter}`,
         });
       } else {
         toast({
@@ -149,7 +150,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{getFinnishBookName(book)}</h1>
           <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
         </div>
         <Card className="p-6">
@@ -163,7 +164,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{getFinnishBookName(book)}</h1>
           <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
         </div>
         <Card className="p-6">
@@ -187,7 +188,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
         </Button>
         
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold text-foreground">{book}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{getFinnishBookName(book)}</h1>
           <h2 className="text-xl text-muted-foreground">Luku {chapter}</h2>
         </div>
         
