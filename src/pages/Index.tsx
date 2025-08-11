@@ -43,6 +43,13 @@ const Index = () => {
     setCurrentView('highlights');
   };
 
+  const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
+    setSelectedBook(bookName);
+    setSelectedChapter(chapter);
+    setTargetVerse(verse);
+    setCurrentView('bible');
+  };
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -61,6 +68,7 @@ const Index = () => {
           targetVerse={targetVerse}
           onBookSelect={handleBookSelect}
           onChapterSelect={handleChapterSelect}
+          onNavigateToVerse={handleNavigateToVerse}
           currentView={currentView}
           searchQuery={searchQuery}
         />

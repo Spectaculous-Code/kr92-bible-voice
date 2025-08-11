@@ -23,6 +23,7 @@ interface MainContentProps {
   targetVerse?: number;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
+  onNavigateToVerse: (bookName: string, chapter: number, verse?: number) => void;
   currentView: 'bible' | 'search' | 'summaries' | 'highlights';
   searchQuery?: string;
 }
@@ -33,6 +34,7 @@ const MainContent = ({
   targetVerse,
   onBookSelect,
   onChapterSelect,
+  onNavigateToVerse,
   currentView,
   searchQuery = ""
 }: MainContentProps) => {
@@ -89,8 +91,7 @@ const MainContent = ({
   };
 
   const handleNavigateToVerse = (bookName: string, chapter: number, verse?: number) => {
-    onBookSelect(bookName);
-    onChapterSelect(chapter);
+    onNavigateToVerse(bookName, chapter, verse);
     toast({
       title: "Siirretty",
       description: `${getFinnishBookName(bookName)} ${chapter}${verse ? `:${verse}` : ''}`,
