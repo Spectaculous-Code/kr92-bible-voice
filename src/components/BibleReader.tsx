@@ -203,6 +203,27 @@ const BibleReader = ({ book, chapter, onBookSelect, onChapterSelect }: BibleRead
         </div>
       </Card>
 
+      {/* Chapter Navigation - Top */}
+      <div className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={() => navigateChapter('prev')}
+          className="flex items-center gap-2"
+        >
+          <SkipBack className="h-4 w-4" />
+          Edellinen luku
+        </Button>
+        
+        <Button 
+          variant="outline" 
+          onClick={() => navigateChapter('next')}
+          className="flex items-center gap-2"
+        >
+          Seuraava luku
+          <SkipForward className="h-4 w-4" />
+        </Button>
+      </div>
+
       {/* Bible Text */}
       <Card className="p-6">
         <div className="space-y-4 leading-relaxed text-lg">
