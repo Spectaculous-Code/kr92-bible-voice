@@ -71,7 +71,7 @@ export function AppSidebar({
           books!inner(name)
         `)
         .eq('user_id', user.id)
-        .eq('history_type', 'audio')
+        .eq('history_type', 'listen')
         .order('last_read_at', { ascending: false })
         .limit(1);
 
@@ -105,7 +105,7 @@ export function AppSidebar({
         .from('user_markings')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('marking_type', 'summary');
+        .eq('marking_type', 'comment');
 
       setSummariesCount(summariesCountResult || 0);
 
