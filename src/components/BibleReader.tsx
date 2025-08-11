@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Play, Pause, SkipBack, SkipForward, Volume2, Heart, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { getChapterData, ChapterWithVerses, getNextChapter, getPreviousChapter } from "@/lib/bibleService";
+import { getChapterData, ChapterWithVerses, getNextChapter, getPreviousChapter, getBookChapters } from "@/lib/bibleService";
 import { getFinnishBookName } from "@/lib/bookNameMapping";
 import VerseHighlighter from "./VerseHighlighter";
+import InfoBox, { generateNextChapterInfo } from "./InfoBox";
 
 interface BibleReaderProps {
   book: string;
@@ -22,6 +23,8 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [chapterData, setChapterData] = useState<ChapterWithVerses | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showInfoBox, setShowInfoBox] = useState(false);
+  const [infoMessage, setInfoMessage] = useState("");
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
@@ -31,6 +34,20 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       const data = await getChapterData(book, chapter);
       setChapterData(data);
       setLoading(false);
+      
+      // Show next chapter info
+      if (data) {
+        const totalChapters = await getBookChapters(book);
+        const nextChapterInfo = generateNextChapterInfo(
+          book, 
+          chapter, 
+          totalChapters
+        );
+        if (nextChapterInfo) {
+          setInfoMessage(nextChapterInfo);
+          setShowInfoBox(true);
+        }
+      }
     };
 
     fetchChapterData();
@@ -243,6 +260,14 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
 
       {/* Hidden audio element for future implementation */}
       <audio ref={audioRef} style={{ display: 'none' }} />
+      
+      {/* Info Box */}
+      {showInfoBox && (
+        <InfoBox
+          message={infoMessage}
+          onClose={() => setShowInfoBox(false)}
+        />
+      )}
     </div>
   );
 };
