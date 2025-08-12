@@ -63,9 +63,24 @@ const MainContent = ({
           setSelectedVersion(versionsResult.data[0].id);
         }
       }
+
+      // Initialize with proper book name if books are loaded and current selection doesn't exist
+      if (books.length > 0 && !books.find(b => b.name === selectedBook)) {
+        // Try to find Matthew/Matteus first, otherwise use first book
+        const matthewBook = books.find(b => 
+          b.name.toLowerCase().includes('matt') || 
+          b.name.toLowerCase().includes('matias') ||
+          b.name === 'Matthew'
+        );
+        if (matthewBook) {
+          onBookSelect(matthewBook.name);
+        } else {
+          onBookSelect(books[0].name);
+        }
+      }
     };
     fetchInitialData();
-  }, []);
+  }, [selectedBook, onBookSelect]);
 
   useEffect(() => {
     if (currentView === 'search' && searchQuery) {

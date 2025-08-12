@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import MainContent from "@/components/MainContent";
 
 const Index = () => {
-  const [selectedBook, setSelectedBook] = useState("Matteus");
+  const [selectedBook, setSelectedBook] = useState("");
   const [selectedChapter, setSelectedChapter] = useState(1);
   const [targetVerse, setTargetVerse] = useState<number | undefined>();
   const [currentView, setCurrentView] = useState<'bible' | 'search' | 'summaries' | 'highlights'>('bible');
