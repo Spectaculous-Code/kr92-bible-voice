@@ -305,8 +305,22 @@ export function AppSidebar({
             <div className="px-2">
               {selectedVerse ? (
                 <div className="border border-border rounded-lg p-3 bg-muted/30">
-                  <div className="text-xs font-medium text-muted-foreground mb-2">
-                    {getFinnishBookName(selectedVerse.bookName)} {selectedVerse.chapter}:{selectedVerse.verse}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-xs font-medium text-muted-foreground">
+                      {getFinnishBookName(selectedVerse.bookName)} {selectedVerse.chapter}:{selectedVerse.verse}
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-6 px-2 text-xs"
+                      onClick={() => {
+                        // Navigate to verse study page
+                        window.location.href = `/study/${selectedVerse.bookName}/${selectedVerse.chapter}/${selectedVerse.verse}`;
+                      }}
+                    >
+                      <BookOpen className="h-3 w-3 mr-1" />
+                      TUTKI
+                    </Button>
                   </div>
                   <div className="text-sm leading-relaxed text-foreground">
                     {selectedVerse.text}
