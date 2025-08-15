@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { X, Book, Search as SearchIcon } from "lucide-react";
 import { SearchResult } from "@/lib/searchService";
+import { getFinnishBookName } from "@/lib/bookNameMapping";
 
 interface SearchResultsProps {
   results: SearchResult | null;
@@ -54,7 +55,7 @@ const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading, version
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
                       <div className="text-sm text-muted-foreground mb-2">
-                        {verse.book_name} {verse.chapter_number}:{verse.verse_number}
+                        {versionCode?.startsWith('fin') ? getFinnishBookName(verse.book_name) : verse.book_name} {verse.chapter_number}:{verse.verse_number}
                       </div>
                       <div className="text-base leading-relaxed">
                         {verse.text}
