@@ -45,79 +45,138 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
     try {
       setLoading(true);
       
-      // Create OSIS reference from selected verse
-      const osisRef = `${selectedVerse.bookName}.${selectedVerse.chapter}.${selectedVerse.verse}`;
+      // Use the same book name and numbers that were successfully fetched for the main verse
+      const bookName = selectedVerse.bookName;
+      const chapterNum = selectedVerse.chapter;
+      const verseNum = selectedVerse.verse;
+      
+      console.log('Fetching KJV verse for:', { bookName, chapterNum, verseNum });
       
       // Try to use the database function first
+      const osisRef = `${bookName}.${chapterNum}.${verseNum}`;
       const { data, error } = await supabase
         .rpc('get_kjv_verse_with_strongs', { p_osis: osisRef });
 
       if (error) {
         console.error('Error fetching KJV verse with function:', error);
-        // Fallback to manual query
-        await fetchKJVVerseManual(osisRef);
+        // Fallback to manual query using the same successful pattern
+        await fetchKJVVerseManual(bookName, chapterNum, verseNum);
       } else if (data && Array.isArray(data) && data.length > 0) {
         setKjvVerse(data[0] as KJVVerseData);
+        console.log('KJV verse fetched successfully with function');
       } else {
+        console.log('No data from function, trying manual method');
         // Try manual query as fallback
-        await fetchKJVVerseManual(osisRef);
+        await fetchKJVVerseManual(bookName, chapterNum, verseNum);
       }
     } catch (error) {
       console.error('Error in fetchKJVVerse:', error);
-      await fetchKJVVerseManual(`${selectedVerse.bookName}.${selectedVerse.chapter}.${selectedVerse.verse}`);
+      // Always try manual method as final fallback
+      await fetchKJVVerseManual(selectedVerse.bookName, selectedVerse.chapter, selectedVerse.verse);
     } finally {
       setLoading(false);
     }
   };
 
-  const fetchKJVVerseManual = async (osisRef: string) => {
+  const fetchKJVVerseManual = async (bookName: string, chapterNum: number, verseNum: number) => {
     try {
+      console.log('Fetching KJV verse manually for:', { bookName, chapterNum, verseNum });
+
       // Get KJV version ID
-      const { data: kjvVersion } = await supabase
+      const { data: kjvVersion, error: kjvVersionError } = await supabase
         .from('bible_versions')
         .select('id')
         .eq('code', 'KJV')
         .single();
 
-      if (!kjvVersion) return;
+      if (kjvVersionError || !kjvVersion) {
+        console.error('KJV version error:', kjvVersionError);
+        return;
+      }
 
-      // Get verse with Strong's words
-      const { data: verseData } = await supabase
-        .from('verses')
-        .select(`
-          id,
-          text,
-          verse_keys!inner(osis)
-        `)
+      console.log('KJV version found:', kjvVersion);
+
+      // Get the book ID for KJV version
+      const { data: kjvBookData, error: kjvBookError } = await supabase
+        .from('books')
+        .select('id')
+        .eq('name', bookName) // Use the same book name (like "Matthew")
         .eq('version_id', kjvVersion.id)
-        .eq('verse_keys.osis', osisRef)
         .single();
 
-      if (verseData) {
-        // Get Strong's words separately
-        const { data: strongsWords } = await supabase
-          .from('kjv_strongs_words')
-          .select('word_text, word_order, strongs_number')
-          .eq('verse_id', verseData.id)
-          .order('word_order');
-
-        // Construct tagged text from Strong's words
-        const words = strongsWords || [];
-        const taggedText = words
-          .map(word => {
-            if (word.strongs_number) {
-              return `${word.word_text}<${word.strongs_number}>`;
-            }
-            return word.word_text;
-          })
-          .join(' ');
-
-        setKjvVerse({
-          osis: osisRef,
-          plain_text: verseData.text,
-          tagged_text: taggedText || verseData.text
-        });
+      if (kjvBookError || !kjvBookData) {
+        console.error('KJV book error:', kjvBookError);
+        return;
       }
+
+      console.log('KJV book found:', kjvBookData);
+
+      // Get the chapter ID for KJV
+      const { data: kjvChapterData, error: kjvChapterError } = await supabase
+        .from('chapters')
+        .select('id')
+        .eq('book_id', kjvBookData.id)
+        .eq('chapter_number', chapterNum)
+        .single();
+
+      if (kjvChapterError || !kjvChapterData) {
+        console.error('KJV chapter error:', kjvChapterError);
+        return;
+      }
+
+      console.log('KJV chapter found:', kjvChapterData);
+
+      // Get the KJV verse - same pattern as main verse fetching
+      const { data: kjvVerseData, error: kjvVerseError } = await supabase
+        .from('verses')
+        .select('id, text')
+        .eq('chapter_id', kjvChapterData.id)
+        .eq('version_id', kjvVersion.id)
+        .eq('verse_number', verseNum)
+        .single();
+
+      if (kjvVerseError || !kjvVerseData) {
+        console.error('KJV verse error:', kjvVerseError);
+        return;
+      }
+
+      console.log('KJV verse found:', kjvVerseData);
+
+      // Get Strong's words for this verse
+      const { data: strongsWords, error: strongsError } = await supabase
+        .from('kjv_strongs_words')
+        .select('word_text, word_order, strongs_number')
+        .eq('verse_id', kjvVerseData.id)
+        .order('word_order');
+
+      if (strongsError) {
+        console.error('Strong\'s words error:', strongsError);
+        // Even if Strong's words fail, we can still show the KJV text
+      }
+
+      console.log('Strong\'s words found:', strongsWords?.length || 0);
+
+      // Construct tagged text from Strong's words
+      const words = strongsWords || [];
+      const taggedText = words.length > 0 
+        ? words
+            .map(word => {
+              if (word.strongs_number) {
+                return `${word.word_text}<${word.strongs_number}>`;
+              }
+              return word.word_text;
+            })
+            .join(' ')
+        : kjvVerseData.text; // Fallback to plain text if no Strong's numbers
+
+      const osisRef = `${bookName}.${chapterNum}.${verseNum}`;
+      setKjvVerse({
+        osis: osisRef,
+        plain_text: kjvVerseData.text,
+        tagged_text: taggedText
+      });
+
+      console.log('KJV verse set successfully');
     } catch (error) {
       console.error('Error in manual KJV fetch:', error);
     }
