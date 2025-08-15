@@ -127,6 +127,7 @@ export const searchByStrongsNumber = async (strongsNumber: string, targetVersion
     const uniqueOsis = [...new Set(osisReferences)];
     
     console.log('Found OSIS references:', uniqueOsis);
+    console.log('Target version code for search:', targetVersionCode);
 
     // Now find verses in the target version using these OSIS references
     const { data: targetVerses, error: targetError } = await supabase
@@ -156,6 +157,9 @@ export const searchByStrongsNumber = async (strongsNumber: string, targetVersion
       .eq('bible_versions.code', targetVersionCode)
       .in('verse_keys.osis', uniqueOsis as string[])
       .eq('is_superseded', false);
+
+    console.log('Target version query result:', { data: targetVerses, error: targetError });
+    console.log(`Found ${targetVerses?.length || 0} verses in target version`);
 
     if (targetError) {
       console.error('Error fetching target version verses:', targetError);
