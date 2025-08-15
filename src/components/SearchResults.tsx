@@ -28,8 +28,8 @@ const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading, version
             <h2 className="text-lg font-semibold">
               {isLoading ? 'Etsitään...' : 
                results?.type === 'reference' 
-                 ? `Raamatunviittaus${versionCode ? ` (${versionCode})` : ''}` 
-                 : `Tekstihaku${versionCode ? ` (${versionCode})` : ''}`}
+                 ? `Raamatunviittaus${versionCode ? ` (${versionCode})` : ''}${results?.verses ? ` - ${results.verses.length} tulosta` : ''}` 
+                 : `Tekstihaku${versionCode ? ` (${versionCode})` : ''}${results?.verses ? ` - ${results.verses.length} tulosta` : ''}`}
             </h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
