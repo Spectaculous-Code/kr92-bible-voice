@@ -383,7 +383,7 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
                     <div className="flex justify-between items-start gap-4">
                       <div className="flex-1">
                         <div className="text-sm text-muted-foreground mb-2">
-                          {verse.book_name} {verse.chapter_number}:{verse.verse_number}
+                          {currentVersion?.startsWith('fin') ? getFinnishBookName(verse.book_name) : verse.book_name} {verse.chapter_number}:{verse.verse_number}
                         </div>
                         <div className="text-base leading-relaxed">
                           {verse.text}
