@@ -169,7 +169,7 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
         </Button>
         <div className="flex items-center gap-2">
           <BookOpen className="h-5 w-5 text-primary" />
-          <h1 className="text-2xl font-bold">Jaketutkimus</h1>
+          <h1 className="text-2xl font-bold">Jaetutkimus</h1>
         </div>
       </div>
 
@@ -193,7 +193,7 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-lg">KJV Strong's numerot</span>
+            <span className="text-lg">KJV Strong numeroilla</span>
           </CardTitle>
         </CardHeader>
         <CardContent>
