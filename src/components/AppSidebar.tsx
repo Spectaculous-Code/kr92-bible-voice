@@ -306,7 +306,7 @@ export function AppSidebar({
               {selectedVerse ? (
                 <div className="border border-border rounded-lg p-3 bg-muted/30">
                   <div className="text-xs font-medium text-muted-foreground mb-2">
-                    {selectedVerse.bookName} {selectedVerse.chapter}:{selectedVerse.verse}
+                    {getFinnishBookName(selectedVerse.bookName)} {selectedVerse.chapter}:{selectedVerse.verse}
                   </div>
                   <div className="text-sm leading-relaxed text-foreground">
                     {selectedVerse.text}
