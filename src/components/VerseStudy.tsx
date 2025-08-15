@@ -357,13 +357,13 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
 
       {/* Strong's Search Results Dialog */}
       <Dialog open={showStrongsSearch} onOpenChange={setShowStrongsSearch}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
               Jakeet Strong's numerolla {selectedStrongsNumber?.split(', ')[0]}
             </DialogTitle>
           </DialogHeader>
-          <div className="overflow-auto">
+          <div className="flex-1 overflow-y-auto">
             {(() => {
               console.log('Rendering dialog content. Dialog open:', showStrongsSearch);
               console.log('strongsSearchResults:', strongsSearchResults);
@@ -372,7 +372,7 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
               return null;
             })()}
             {strongsSearchResults && strongsSearchResults.verses && strongsSearchResults.verses.length > 0 ? (
-              <div className="space-y-4">
+              <div className="space-y-4 p-1">
                 {strongsSearchResults.verses.map((verse) => (
                   <div 
                     key={verse.id} 
