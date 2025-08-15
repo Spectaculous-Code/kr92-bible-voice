@@ -23,10 +23,30 @@ const VerseStudyPage = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Get the current version from localStorage if available
+    const savedVersionId = localStorage.getItem('selectedBibleVersion');
+    if (savedVersionId) {
+      // Get the version code from the version ID
+      const getVersionCode = async () => {
+        const { data: versionData } = await supabase
+          .from('bible_versions')
+          .select('code')
+          .eq('id', savedVersionId)
+          .single();
+        
+        if (versionData?.code) {
+          setCurrentVersion(versionData.code);
+        }
+      };
+      getVersionCode();
+    }
+  }, []);
+
+  useEffect(() => {
     if (book && chapter && verse) {
       fetchVerseData();
     }
-  }, [book, chapter, verse]);
+  }, [book, chapter, verse, currentVersion]); // Add currentVersion as dependency
 
   const fetchVerseData = async () => {
     try {
@@ -41,9 +61,6 @@ const VerseStudyPage = () => {
       const verseNum = parseInt(verse);
       
       console.log('Fetching verse data for:', { book, chapterNum, verseNum });
-
-      // Use the current version from the app (fin33) instead of hardcoded fin2017
-      const currentVersion = 'fin33'; // This matches what the main app is using
       console.log('Using version:', currentVersion);
 
       // Get the version ID

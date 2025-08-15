@@ -54,8 +54,20 @@ const MainContent = ({
       
       if (versionsResult.data) {
         setBibleVersions(versionsResult.data);
-        if (versionsResult.data.length > 0) {
-          setSelectedVersion(versionsResult.data[0].id);
+        
+        // Try to get version from localStorage first, otherwise use default
+        const savedVersion = localStorage.getItem('selectedBibleVersion');
+        let versionToUse = '';
+        
+        if (savedVersion && versionsResult.data.find(v => v.id === savedVersion)) {
+          versionToUse = savedVersion;
+        } else if (versionsResult.data.length > 0) {
+          versionToUse = versionsResult.data[0].id;
+        }
+        
+        if (versionToUse) {
+          setSelectedVersion(versionToUse);
+          localStorage.setItem('selectedBibleVersion', versionToUse);
         }
       }
     };
@@ -227,7 +239,7 @@ const MainContent = ({
               </Select>
 
               {/* Version Selection */}
-              <Select value={selectedVersion} onValueChange={setSelectedVersion}>
+              <Select value={selectedVersion} onValueChange={(value) => { setSelectedVersion(value); localStorage.setItem('selectedBibleVersion', value); }}>
                 <SelectTrigger className="w-[100px]">
                   <SelectValue placeholder="Versio" />
                 </SelectTrigger>
