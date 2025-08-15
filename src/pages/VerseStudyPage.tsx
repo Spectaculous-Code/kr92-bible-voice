@@ -82,7 +82,7 @@ const VerseStudyPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Ladataan jaketutkimusta...</div>
+        <div className="text-lg">Ladataan jaetutkimusta...</div>
       </div>
     );
   }
@@ -90,7 +90,7 @@ const VerseStudyPage = () => {
   if (!selectedVerse) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg text-muted-foreground">Jaketta ei löytynyt</div>
+        <div className="text-lg text-muted-foreground">Jaetta ei löytynyt</div>
       </div>
     );
   }
