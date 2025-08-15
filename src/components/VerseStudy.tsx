@@ -212,6 +212,7 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
     if (!selectedStrongsNumber) return;
     
     console.log('handleStrongsSearch called with:', selectedStrongsNumber);
+    console.log('Current version for search:', currentVersion);
     setIsSearchingStrongs(true);
     try {
       // For multiple Strong's numbers, search for the first one
@@ -219,6 +220,8 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
       console.log('Searching for first number:', firstNumber);
       const results = await searchByStrongsNumber(firstNumber, currentVersion);
       console.log('Search results received:', results);
+      console.log('First result verse text sample:', results?.verses?.[0]?.text?.substring(0, 50));
+      console.log('First result version code:', results?.verses?.[0]?.version_code);
       setStrongsSearchResults(results);
       console.log('Setting showStrongsSearch to true');
       setShowStrongsSearch(true);
