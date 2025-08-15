@@ -182,37 +182,46 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
     }
   };
 
-  const handleStrongsClick = (strongsNumber: string) => {
-    setSelectedStrongsNumber(strongsNumber);
-    // In a real implementation, you would fetch the Strong's definition
-    // For now, we'll show a placeholder
+  const handleStrongsClick = (strongsNumbers: string) => {
+    setSelectedStrongsNumber(strongsNumbers);
+    // In a real implementation, you would fetch the Strong's definitions for all numbers
+    // For now, we'll show a placeholder for multiple numbers
+    const numbers = strongsNumbers.split(', ');
+    const definitionText = numbers.length > 1 
+      ? `Definitions for Strong's ${strongsNumbers} would appear here (multiple definitions)`
+      : `Definition for Strong's ${strongsNumbers} would appear here`;
+    
     setStrongsDefinition({
-      number: strongsNumber,
-      definition: `Definition for Strong's ${strongsNumber} would appear here`,
-      partOfSpeech: "noun/verb/adjective",
-      transliteration: "transliteration here"
+      number: strongsNumbers,
+      definition: definitionText,
+      partOfSpeech: numbers.length > 1 ? "multiple parts of speech" : "noun/verb/adjective",
+      transliteration: numbers.length > 1 ? "multiple transliterations" : "transliteration here"
     });
   };
 
   const renderTaggedText = (taggedText: string) => {
     // First, normalize the text to handle both "word<G123>" and "word <G123>" patterns
-    // Handle both Greek (G) and Hebrew (H) Strong's numbers
+    // Handle both Greek (G) and Hebrew (H) Strong's numbers, including multiple numbers
     const normalizedText = taggedText.replace(/\s+<([GH]\d+)>/g, '<$1>');
     
     // Parse the normalized text and create clickable Strong's words
     const words = normalizedText.split(' ');
     
     return words.map((word, index) => {
-      const strongsMatch = word.match(/^(.+?)<([GH].+?)>$/);
+      // Look for words with one or more Strong's numbers: word<G123><G456>
+      const strongsMatch = word.match(/^(.+?)(<[GH].+?>)+$/);
       if (strongsMatch) {
-        const [, wordText, strongsNum] = strongsMatch;
+        const [, wordText] = strongsMatch;
+        // Extract all Strong's numbers from the word
+        const strongsNumbers = word.match(/<([GH]\d+)>/g)?.map(match => match.slice(1, -1)) || [];
+        
         return (
           <span key={index}>
             <Button
               variant="link"
               size="sm"
               className="p-0 h-auto text-base text-foreground hover:text-primary underline font-normal"
-              onClick={() => handleStrongsClick(strongsNum)}
+              onClick={() => handleStrongsClick(strongsNumbers.join(', '))}
             >
               {wordText}
             </Button>
