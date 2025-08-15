@@ -314,8 +314,10 @@ export function AppSidebar({
                       size="sm" 
                       className="h-6 px-2 text-xs"
                       onClick={() => {
-                        // Navigate to verse study page
-                        window.location.href = `/study/${selectedVerse.bookName}/${selectedVerse.chapter}/${selectedVerse.verse}`;
+                        // Get the English book name for the URL
+                        const englishBookName = selectedVerse.bookName;
+                        console.log('Navigating to study page with book:', englishBookName);
+                        window.location.href = `/study/${englishBookName}/${selectedVerse.chapter}/${selectedVerse.verse}`;
                       }}
                     >
                       <BookOpen className="h-3 w-3 mr-1" />
