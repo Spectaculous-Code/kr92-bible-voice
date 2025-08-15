@@ -362,12 +362,7 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
           <div className="overflow-auto">
             <SearchResults
               results={strongsSearchResults ? {
-                verses: strongsSearchResults.verses.map(verse => ({
-                  ...verse,
-                  book: verse.book_name,
-                  chapter: verse.chapter_number,
-                  verse: verse.verse_number
-                })),
+                verses: strongsSearchResults.verses,
                 type: 'text' as const
               } : null}
               onClose={() => setShowStrongsSearch(false)}
