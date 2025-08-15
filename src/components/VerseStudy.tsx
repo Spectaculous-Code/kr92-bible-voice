@@ -210,12 +210,16 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
   const handleStrongsSearch = async () => {
     if (!selectedStrongsNumber) return;
     
+    console.log('handleStrongsSearch called with:', selectedStrongsNumber);
     setIsSearchingStrongs(true);
     try {
       // For multiple Strong's numbers, search for the first one
       const firstNumber = selectedStrongsNumber.split(', ')[0];
+      console.log('Searching for first number:', firstNumber);
       const results = await searchByStrongsNumber(firstNumber);
+      console.log('Search results received:', results);
       setStrongsSearchResults(results);
+      console.log('Setting showStrongsSearch to true');
       setShowStrongsSearch(true);
     } catch (error) {
       console.error('Error searching Strong\'s number:', error);
