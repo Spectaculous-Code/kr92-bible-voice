@@ -39,6 +39,19 @@ const BibleReader = ({ book, chapter, targetVerse, versionCode = 'fin2017', onBo
       setChapterData(data);
       setLoading(false);
       
+      // Save current reading position to localStorage
+      if (data) {
+        const currentPosition = {
+          book: book,
+          chapter: chapter,
+          bookName: getFinnishBookName(book),
+          versionCode: versionCode,
+          timestamp: Date.now()
+        };
+        localStorage.setItem('lastReadingPosition', JSON.stringify(currentPosition));
+        console.log('Saved reading position:', currentPosition);
+      }
+      
       // Only show next chapter info if explicitly enabled and not navigating programmatically
       if (data && showNextChapterInfo && !isNavigating) {
         const totalChapters = await getBookChapters(book, versionCode);

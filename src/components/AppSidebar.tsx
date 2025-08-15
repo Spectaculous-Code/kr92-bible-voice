@@ -35,7 +35,7 @@ import { getFinnishBookName } from "@/lib/bookNameMapping";
 interface AppSidebarProps {
   onNavigateToSearch: (query: string) => void;
   onNavigateToContinueAudio: () => void;
-  onNavigateToContinueText: () => void;
+  onNavigateToContinueText: (book?: string, chapter?: number) => void;
   onNavigateToSummaries: () => void;
   onNavigateToHighlights: () => void;
   selectedVerse?: {
@@ -60,6 +60,7 @@ export function AppSidebar({
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const [lastAudioPosition, setLastAudioPosition] = useState<string>("Ei viimeisintä");
   const [lastTextPosition, setLastTextPosition] = useState<string>("Ei viimeisintä");
+  const [lastReadingData, setLastReadingData] = useState<any>(null);
   const [summariesCount, setSummariesCount] = useState(0);
   const [highlightsCount, setHighlightsCount] = useState(0);
   const { toast } = useToast();
@@ -126,7 +127,23 @@ export function AppSidebar({
     };
 
     fetchUserData();
+    
+    // Load last reading position from localStorage
+    loadLastReadingPosition();
   }, []);
+
+  const loadLastReadingPosition = () => {
+    try {
+      const savedPosition = localStorage.getItem('lastReadingPosition');
+      if (savedPosition) {
+        const positionData = JSON.parse(savedPosition);
+        setLastReadingData(positionData);
+        setLastTextPosition(`${positionData.bookName} ${positionData.chapter}`);
+      }
+    } catch (error) {
+      console.error('Error loading reading position:', error);
+    }
+  };
 
   const handleSearch = () => {
     if (searchQuery.trim()) {
@@ -242,12 +259,22 @@ export function AppSidebar({
               {/* Continue Text */}
               <SidebarMenuItem>
                 <div className="space-y-1">
-                  <SidebarMenuButton onClick={onNavigateToContinueText}>
+                  <SidebarMenuButton 
+                    onClick={() => {
+                      if (lastReadingData) {
+                        // Navigate to the saved reading position
+                        onNavigateToContinueText(lastReadingData.book, lastReadingData.chapter);
+                      } else {
+                        onNavigateToContinueText();
+                      }
+                    }}
+                    className={lastReadingData ? "cursor-pointer" : ""}
+                  >
                     <FileText className="h-4 w-4" />
                     {!collapsed && <span>Jatka lukemista</span>}
                   </SidebarMenuButton>
                   {!collapsed && (
-                    <div className="ml-8 text-xs text-muted-foreground">
+                    <div className={`ml-8 text-xs ${lastReadingData ? 'text-primary cursor-pointer' : 'text-muted-foreground'}`}>
                       {lastTextPosition}
                     </div>
                   )}

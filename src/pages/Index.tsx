@@ -36,9 +36,14 @@ const Index = () => {
     // TODO: Load last audio position
   };
 
-  const handleNavigateToContinueText = () => {
+  const handleNavigateToContinueText = (book?: string, chapter?: number) => {
+    if (book && chapter) {
+      // Navigate to the saved reading position
+      setSelectedBook(book);
+      setSelectedChapter(chapter);
+      setTargetVerse(undefined);
+    }
     setCurrentView('bible');
-    // TODO: Load last reading position
   };
 
   const handleNavigateToSummaries = () => {
