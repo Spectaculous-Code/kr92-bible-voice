@@ -1,10 +1,15 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ArrowLeft, BookOpen, Search } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { getFinnishBookName } from "@/lib/bookNameMapping";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import SearchResults from "./SearchResults";
+import { searchByStrongsNumber, StrongsSearchResult } from "@/lib/strongsSearchService";
+import { SearchResult } from "@/lib/searchService";
 
 interface SelectedVerse {
   bookName: string;
@@ -36,6 +41,9 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
   const [selectedStrongsNumber, setSelectedStrongsNumber] = useState<string | null>(null);
   const [strongsDefinition, setStrongsDefinition] = useState<StrongsDefinition | null>(null);
   const [loading, setLoading] = useState(true);
+  const [strongsSearchResults, setStrongsSearchResults] = useState<StrongsSearchResult | null>(null);
+  const [showStrongsSearch, setShowStrongsSearch] = useState(false);
+  const [isSearchingStrongs, setIsSearchingStrongs] = useState(false);
 
   useEffect(() => {
     fetchKJVVerse();
@@ -199,6 +207,29 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
     });
   };
 
+  const handleStrongsSearch = async () => {
+    if (!selectedStrongsNumber) return;
+    
+    setIsSearchingStrongs(true);
+    try {
+      // For multiple Strong's numbers, search for the first one
+      const firstNumber = selectedStrongsNumber.split(', ')[0];
+      const results = await searchByStrongsNumber(firstNumber);
+      setStrongsSearchResults(results);
+      setShowStrongsSearch(true);
+    } catch (error) {
+      console.error('Error searching Strong\'s number:', error);
+    } finally {
+      setIsSearchingStrongs(false);
+    }
+  };
+
+  const handleStrongsSearchNavigate = (bookName: string, chapter: number, verse?: number) => {
+    setShowStrongsSearch(false);
+    // Navigate to the new verse study page
+    window.location.href = `/study/${bookName}/${chapter}/${verse || 1}`;
+  };
+
   const renderTaggedText = (taggedText: string) => {
     // First, normalize the text to handle both "word<G123>" and "word <G123>" patterns
     // Handle both Greek (G) and Hebrew (H) Strong's numbers, including multiple numbers
@@ -288,8 +319,17 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
       {selectedStrongsNumber && strongsDefinition && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center justify-between">
               <span className="text-lg">Strong's {selectedStrongsNumber}</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleStrongsSearch}
+                disabled={isSearchingStrongs}
+              >
+                <Search className="h-4 w-4 mr-2" />
+                {isSearchingStrongs ? 'Etsitään...' : 'Hae jakeita'}
+              </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -310,6 +350,30 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
           </CardContent>
         </Card>
       )}
+
+      {/* Strong's Search Results Dialog */}
+      <Dialog open={showStrongsSearch} onOpenChange={setShowStrongsSearch}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>
+              Jakeet Strong's numerolla {selectedStrongsNumber?.split(', ')[0]}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="overflow-auto">
+            {strongsSearchResults && (
+              <SearchResults
+                results={{
+                  verses: strongsSearchResults.verses,
+                  type: 'text' as const
+                }}
+                onClose={() => setShowStrongsSearch(false)}
+                onNavigateToVerse={handleStrongsSearchNavigate}
+                isLoading={isSearchingStrongs}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
