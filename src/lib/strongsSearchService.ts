@@ -15,21 +15,14 @@ export interface StrongsSearchResult {
   search_term: string;
 }
 
-export const searchByStrongsNumber = async (strongsNumber: string): Promise<StrongsSearchResult> => {
+export const searchByStrongsNumber = async (strongsNumber: string, targetVersionCode?: string): Promise<StrongsSearchResult> => {
   try {
     console.log('Searching for Strong\'s number:', strongsNumber);
+    console.log('Target version:', targetVersionCode);
 
     // Clean the Strong's number (remove G/H prefix if present for search)
     const cleanNumber = strongsNumber.replace(/^[GH]/, '');
     console.log('Cleaned Strong\'s number:', cleanNumber);
-
-    // First, let's check what Strong's numbers exist in the database
-    const { data: allStrongsWords, error: debugError } = await supabase
-      .from('kjv_strongs_words')
-      .select('strongs_number')
-      .limit(10);
-    
-    console.log('Sample Strong\'s numbers in database:', allStrongsWords);
 
     // Try different search patterns
     const searchPatterns = [
@@ -44,8 +37,9 @@ export const searchByStrongsNumber = async (strongsNumber: string): Promise<Stro
 
     console.log('Trying search patterns:', searchPatterns);
 
-    let foundResults = null;
+    let kjvVerses = null;
 
+    // First, find the KJV verses that contain this Strong's number
     for (const pattern of searchPatterns) {
       console.log('Trying pattern:', pattern);
       
@@ -57,6 +51,7 @@ export const searchByStrongsNumber = async (strongsNumber: string): Promise<Stro
           word_text,
           verses!inner(
             id,
+            verse_key_id,
             text,
             chapter_id,
             version_id,
@@ -72,6 +67,9 @@ export const searchByStrongsNumber = async (strongsNumber: string): Promise<Stro
             ),
             bible_versions!inner(
               code
+            ),
+            verse_keys!inner(
+              osis
             )
           )
         `)
@@ -85,15 +83,14 @@ export const searchByStrongsNumber = async (strongsNumber: string): Promise<Stro
       console.log(`Found ${strongsWords?.length || 0} results with pattern:`, pattern);
       
       if (strongsWords && strongsWords.length > 0) {
-        foundResults = strongsWords;
+        kjvVerses = strongsWords;
         console.log('Success with pattern:', pattern);
-        console.log('Sample result:', strongsWords[0]);
         break;
       }
     }
 
-    if (!foundResults) {
-      console.log('No results found with any pattern');
+    if (!kjvVerses) {
+      console.log('No KJV verses found with Strong\'s number');
       return {
         verses: [],
         total_count: 0,
@@ -101,28 +98,132 @@ export const searchByStrongsNumber = async (strongsNumber: string): Promise<Stro
       };
     }
 
-    // Transform the data to match the expected format
-    const verses = foundResults.map(item => ({
-      id: item.verses.id,
-      book_name: item.verses.chapters.books.name,
-      chapter_number: item.verses.chapters.chapter_number,
-      verse_number: item.verses.verse_number,
-      text: item.verses.text,
-      version_code: item.verses.bible_versions.code,
-      book_id: item.verses.chapters.books.id,
-      chapter_id: item.verses.chapters.id
+    // If no target version specified, return KJV results
+    if (!targetVersionCode || targetVersionCode === 'KJV') {
+      const verses = kjvVerses.map(item => ({
+        id: item.verses.id,
+        book_name: item.verses.chapters.books.name,
+        chapter_number: item.verses.chapters.chapter_number,
+        verse_number: item.verses.verse_number,
+        text: item.verses.text,
+        version_code: item.verses.bible_versions.code,
+        book_id: item.verses.chapters.books.id,
+        chapter_id: item.verses.chapters.id
+      }));
+
+      const uniqueVerses = verses.filter((verse, index, self) => 
+        index === self.findIndex(v => v.id === verse.id)
+      );
+
+      return {
+        verses: uniqueVerses,
+        total_count: uniqueVerses.length,
+        search_term: strongsNumber
+      };
+    }
+
+    // Get the OSIS references from the KJV verses
+    const osisReferences = kjvVerses.map(item => item.verses.verse_keys.osis).filter((osis): osis is string => osis != null);
+    const uniqueOsis = [...new Set(osisReferences)];
+    
+    console.log('Found OSIS references:', uniqueOsis);
+
+    // Now find verses in the target version using these OSIS references
+    const { data: targetVerses, error: targetError } = await supabase
+      .from('verses')
+      .select(`
+        id,
+        text,
+        verse_number,
+        chapter_id,
+        version_id,
+        verse_keys!inner(
+          osis
+        ),
+        chapters!inner(
+          id,
+          chapter_number,
+          book_id,
+          books!inner(
+            id,
+            name
+          )
+        ),
+        bible_versions!inner(
+          code
+        )
+      `)
+      .eq('bible_versions.code', targetVersionCode)
+      .in('verse_keys.osis', uniqueOsis as string[])
+      .eq('is_superseded', false);
+
+    if (targetError) {
+      console.error('Error fetching target version verses:', targetError);
+      // Fallback to KJV if target version fails
+      const verses = kjvVerses.map(item => ({
+        id: item.verses.id,
+        book_name: item.verses.chapters.books.name,
+        chapter_number: item.verses.chapters.chapter_number,
+        verse_number: item.verses.verse_number,
+        text: item.verses.text,
+        version_code: item.verses.bible_versions.code,
+        book_id: item.verses.chapters.books.id,
+        chapter_id: item.verses.chapters.id
+      }));
+
+      const uniqueVerses = verses.filter((verse, index, self) => 
+        index === self.findIndex(v => v.id === verse.id)
+      );
+
+      return {
+        verses: uniqueVerses,
+        total_count: uniqueVerses.length,
+        search_term: strongsNumber
+      };
+    }
+
+    if (!targetVerses || targetVerses.length === 0) {
+      console.log('No verses found in target version, falling back to KJV');
+      // Fallback to KJV if no verses found in target version
+      const verses = kjvVerses.map(item => ({
+        id: item.verses.id,
+        book_name: item.verses.chapters.books.name,
+        chapter_number: item.verses.chapters.chapter_number,
+        verse_number: item.verses.verse_number,
+        text: item.verses.text,
+        version_code: item.verses.bible_versions.code,
+        book_id: item.verses.chapters.books.id,
+        chapter_id: item.verses.chapters.id
+      }));
+
+      const uniqueVerses = verses.filter((verse, index, self) => 
+        index === self.findIndex(v => v.id === verse.id)
+      );
+
+      return {
+        verses: uniqueVerses,
+        total_count: uniqueVerses.length,
+        search_term: strongsNumber
+      };
+    }
+
+    console.log(`Found ${targetVerses.length} verses in target version ${targetVersionCode}`);
+
+    // Transform target version verses to expected format
+    const verses = targetVerses.map(verse => ({
+      id: verse.id,
+      book_name: verse.chapters.books.name,
+      chapter_number: verse.chapters.chapter_number,
+      verse_number: verse.verse_number,
+      text: verse.text,
+      version_code: verse.bible_versions.code,
+      book_id: verse.chapters.books.id,
+      chapter_id: verse.chapters.id
     }));
 
-    // Remove duplicates (same verse might have multiple words with the same Strong's number)
-    const uniqueVerses = verses.filter((verse, index, self) => 
-      index === self.findIndex(v => v.id === verse.id)
-    );
-
-    console.log(`Found ${uniqueVerses.length} unique verses with Strong's ${strongsNumber}`);
-
     return {
-      verses: uniqueVerses,
-      total_count: uniqueVerses.length,
+      verses: verses,
+      total_count: verses.length,
       search_term: strongsNumber
     };
 

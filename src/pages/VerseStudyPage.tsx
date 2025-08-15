@@ -19,6 +19,7 @@ const VerseStudyPage = () => {
   }>();
   const navigate = useNavigate();
   const [selectedVerse, setSelectedVerse] = useState<SelectedVerse | null>(null);
+  const [currentVersion, setCurrentVersion] = useState<string>('fin33');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -142,7 +143,7 @@ const VerseStudyPage = () => {
     );
   }
 
-  return <VerseStudy selectedVerse={selectedVerse} onBack={handleBack} />;
+  return <VerseStudy selectedVerse={selectedVerse} onBack={handleBack} currentVersion={currentVersion} />;
 };
 
 export default VerseStudyPage;

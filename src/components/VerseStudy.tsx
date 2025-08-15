@@ -21,6 +21,7 @@ interface SelectedVerse {
 interface VerseStudyProps {
   selectedVerse: SelectedVerse;
   onBack: () => void;
+  currentVersion?: string; // Add current version prop
 }
 
 interface KJVVerseData {
@@ -36,7 +37,7 @@ interface StrongsDefinition {
   transliteration: string;
 }
 
-const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
+const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) => {
   const [kjvVerse, setKjvVerse] = useState<KJVVerseData | null>(null);
   const [selectedStrongsNumber, setSelectedStrongsNumber] = useState<string | null>(null);
   const [strongsDefinition, setStrongsDefinition] = useState<StrongsDefinition | null>(null);
@@ -216,7 +217,7 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
       // For multiple Strong's numbers, search for the first one
       const firstNumber = selectedStrongsNumber.split(', ')[0];
       console.log('Searching for first number:', firstNumber);
-      const results = await searchByStrongsNumber(firstNumber);
+      const results = await searchByStrongsNumber(firstNumber, currentVersion);
       console.log('Search results received:', results);
       setStrongsSearchResults(results);
       console.log('Setting showStrongsSearch to true');
