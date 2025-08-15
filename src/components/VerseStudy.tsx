@@ -195,8 +195,13 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
   };
 
   const renderTaggedText = (taggedText: string) => {
-    // Parse the tagged text and create clickable Strong's words
-    return taggedText.split(' ').map((word, index) => {
+    // First, normalize the text to handle both "word<G123>" and "word <G123>" patterns
+    const normalizedText = taggedText.replace(/\s+<(G\d+)>/g, '<$1>');
+    
+    // Parse the normalized text and create clickable Strong's words
+    const words = normalizedText.split(' ');
+    
+    return words.map((word, index) => {
       const strongsMatch = word.match(/^(.+?)<(.+?)>$/);
       if (strongsMatch) {
         const [, wordText, strongsNum] = strongsMatch;
@@ -210,11 +215,11 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
             >
               {wordText}
             </Button>
-            {index < taggedText.split(' ').length - 1 ? ' ' : ''}
+            {index < words.length - 1 ? ' ' : ''}
           </span>
         );
       }
-      return <span key={index}>{word}{index < taggedText.split(' ').length - 1 ? ' ' : ''}</span>;
+      return <span key={index}>{word}{index < words.length - 1 ? ' ' : ''}</span>;
     });
   };
 
