@@ -360,17 +360,20 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
             </DialogTitle>
           </DialogHeader>
           <div className="overflow-auto">
-            {strongsSearchResults && (
-              <SearchResults
-                results={{
-                  verses: strongsSearchResults.verses,
-                  type: 'text' as const
-                }}
-                onClose={() => setShowStrongsSearch(false)}
-                onNavigateToVerse={handleStrongsSearchNavigate}
-                isLoading={isSearchingStrongs}
-              />
-            )}
+            <SearchResults
+              results={strongsSearchResults ? {
+                verses: strongsSearchResults.verses.map(verse => ({
+                  ...verse,
+                  book: verse.book_name,
+                  chapter: verse.chapter_number,
+                  verse: verse.verse_number
+                })),
+                type: 'text' as const
+              } : null}
+              onClose={() => setShowStrongsSearch(false)}
+              onNavigateToVerse={handleStrongsSearchNavigate}
+              isLoading={isSearchingStrongs}
+            />
           </div>
         </DialogContent>
       </Dialog>
