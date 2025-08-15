@@ -41,92 +41,80 @@ const VerseStudyPage = () => {
       
       console.log('Fetching verse data for:', { book, chapterNum, verseNum });
 
-      // Try to get the current version from localStorage or default to fin2017
-      const currentVersion = localStorage.getItem('selectedBibleVersion') || 'fin2017';
+      // Use the current version from the app (fin33) instead of hardcoded fin2017
+      const currentVersion = 'fin33'; // This matches what the main app is using
       console.log('Using version:', currentVersion);
 
-      // First, let's try to find the book name as-is, then try English mapping
-      let bookName = book;
-      console.log('Original book name:', bookName);
-      
-      // If it's a Finnish book name, try to get English equivalent
-      if (Object.values(englishToFinnishBookNames).includes(book)) {
-        bookName = getEnglishBookName(book);
-        console.log('Mapped to English book name:', bookName);
-      }
-
-      // Fetch version data
+      // Get the version ID
       const { data: versionData, error: versionError } = await supabase
         .from('bible_versions')
-        .select('id, code')
+        .select('id')
         .eq('code', currentVersion)
         .single();
 
       if (versionError || !versionData) {
         console.error('Version error:', versionError);
-        // Fallback to fin2017
-        const { data: fallbackVersion } = await supabase
-          .from('bible_versions')
-          .select('id, code')
-          .eq('code', 'fin2017')
-          .single();
-        
-        if (!fallbackVersion) {
-          console.error('No fallback version found');
-          return;
-        }
-        console.log('Using fallback version:', fallbackVersion);
+        return;
       }
 
-      const version = versionData || await supabase.from('bible_versions').select('id, code').eq('code', 'fin2017').single().then(r => r.data);
-      if (!version) return;
+      console.log('Version found:', versionData);
 
-      // Try different OSIS reference formats
-      const osisFormats = [
-        `${bookName}.${chapterNum}.${verseNum}`,
-        `${book}.${chapterNum}.${verseNum}`,
-        // Add more potential formats if needed
-      ];
+      // Get the book ID - use the book name directly as it appears in the database
+      const { data: bookData, error: bookError } = await supabase
+        .from('books')
+        .select('id')
+        .eq('name', book) // Use book name directly (like "Matthew")
+        .eq('version_id', versionData.id)
+        .single();
 
-      console.log('Trying OSIS formats:', osisFormats);
-
-      let verseData = null;
-      let usedOsis = '';
-
-      for (const osisRef of osisFormats) {
-        console.log('Trying OSIS:', osisRef);
-        
-        const { data, error } = await supabase
-          .from('verses')
-          .select(`
-            text,
-            verse_keys!inner(osis)
-          `)
-          .eq('version_id', version.id)
-          .eq('verse_keys.osis', osisRef)
-          .single();
-
-        if (error) {
-          console.log('Error with OSIS', osisRef, ':', error);
-        } else if (data) {
-          console.log('Found verse with OSIS:', osisRef, data);
-          verseData = data;
-          usedOsis = osisRef;
-          break;
-        }
+      if (bookError || !bookData) {
+        console.error('Book error:', bookError);
+        console.log('Tried to find book:', book);
+        return;
       }
 
-      if (verseData) {
-        setSelectedVerse({
-          bookName: bookName,
-          chapter: chapterNum,
-          verse: verseNum,
-          text: verseData.text
-        });
-        console.log('Successfully set verse data');
-      } else {
-        console.error('No verse found with any OSIS format');
+      console.log('Book found:', bookData);
+
+      // Get the chapter ID
+      const { data: chapterData, error: chapterError } = await supabase
+        .from('chapters')
+        .select('id')
+        .eq('book_id', bookData.id)
+        .eq('chapter_number', chapterNum)
+        .single();
+
+      if (chapterError || !chapterData) {
+        console.error('Chapter error:', chapterError);
+        return;
       }
+
+      console.log('Chapter found:', chapterData);
+
+      // Get the specific verse - this is the same way the main Bible reader gets verses
+      const { data: verseData, error: verseError } = await supabase
+        .from('verses')
+        .select('*')
+        .eq('chapter_id', chapterData.id)
+        .eq('version_id', versionData.id)
+        .eq('verse_number', verseNum)
+        .single();
+
+      if (verseError || !verseData) {
+        console.error('Verse error:', verseError);
+        return;
+      }
+
+      console.log('Verse found:', verseData);
+
+      // Successfully found the verse
+      setSelectedVerse({
+        bookName: book,
+        chapter: chapterNum,
+        verse: verseNum,
+        text: verseData.text
+      });
+      
+      console.log('Successfully set verse data');
     } catch (error) {
       console.error('Error fetching verse data:', error);
     } finally {
