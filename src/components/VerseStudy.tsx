@@ -360,6 +360,13 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
             </DialogTitle>
           </DialogHeader>
           <div className="overflow-auto">
+            {(() => {
+              console.log('Dialog open:', showStrongsSearch);
+              console.log('strongsSearchResults:', strongsSearchResults);
+              console.log('verses count:', strongsSearchResults?.verses?.length);
+              console.log('Sample verse:', strongsSearchResults?.verses?.[0]);
+              return null;
+            })()}
             <SearchResults
               results={strongsSearchResults ? {
                 verses: strongsSearchResults.verses,
