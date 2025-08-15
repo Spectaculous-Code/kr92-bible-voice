@@ -50,12 +50,7 @@ const MainContent = ({
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const [books, versionsResult] = await Promise.all([
-        getBibleBooks(),
-        supabase.from('bible_versions').select('id, name, code').eq('is_active', true).order('name')
-      ]);
-      
-      setBibleBooks(books);
+      const versionsResult = await supabase.from('bible_versions').select('id, name, code').eq('is_active', true).order('name');
       
       if (versionsResult.data) {
         setBibleVersions(versionsResult.data);
@@ -63,24 +58,38 @@ const MainContent = ({
           setSelectedVersion(versionsResult.data[0].id);
         }
       }
+    };
+    fetchInitialData();
+  }, []);
 
-      // Initialize with proper book name if books are loaded and current selection doesn't exist
-      if (books.length > 0 && !books.find(b => b.name === selectedBook)) {
-        // Try to find Matthew/Matteus first, otherwise use first book
-        const matthewBook = books.find(b => 
-          b.name.toLowerCase().includes('matt') || 
-          b.name.toLowerCase().includes('matias') ||
-          b.name === 'Matthew'
-        );
-        if (matthewBook) {
-          onBookSelect(matthewBook.name);
-        } else {
-          onBookSelect(books[0].name);
+  // Fetch books when version changes
+  useEffect(() => {
+    const fetchBooksForVersion = async () => {
+      if (selectedVersion && bibleVersions.length > 0) {
+        const version = bibleVersions.find(v => v.id === selectedVersion);
+        if (version) {
+          const books = await getBibleBooks(version.code);
+          setBibleBooks(books);
+
+          // Initialize with proper book name if books are loaded and current selection doesn't exist
+          if (books.length > 0 && !books.find(b => b.name === selectedBook)) {
+            // Try to find Matthew/Matteus first, otherwise use first book
+            const matthewBook = books.find(b => 
+              b.name.toLowerCase().includes('matt') || 
+              b.name.toLowerCase().includes('matias') ||
+              b.name === 'Matthew'
+            );
+            if (matthewBook) {
+              onBookSelect(matthewBook.name);
+            } else {
+              onBookSelect(books[0].name);
+            }
+          }
         }
       }
     };
-    fetchInitialData();
-  }, [selectedBook, onBookSelect]);
+    fetchBooksForVersion();
+  }, [selectedVersion, bibleVersions, selectedBook, onBookSelect]);
 
   useEffect(() => {
     if (currentView === 'search' && searchQuery) {
@@ -159,11 +168,13 @@ const MainContent = ({
         );
       
       default:
+        const currentVersionCode = bibleVersions.find(v => v.id === selectedVersion)?.code || 'fin2017';
         return (
           <BibleReader
             book={selectedBook}
             chapter={selectedChapter}
             targetVerse={targetVerse}
+            versionCode={currentVersionCode}
             onBookSelect={onBookSelect}
             onChapterSelect={onChapterSelect}
             onVerseSelect={onVerseSelect}

@@ -12,13 +12,14 @@ interface BibleReaderProps {
   book: string;
   chapter: number;
   targetVerse?: number;
+  versionCode?: string;
   onBookSelect: (book: string) => void;
   onChapterSelect: (chapter: number) => void;
   onVerseSelect: (bookName: string, chapter: number, verse: number, text: string) => void;
   showNextChapterInfo?: boolean;
 }
 
-const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect, onVerseSelect, showNextChapterInfo = true }: BibleReaderProps) => {
+const BibleReader = ({ book, chapter, targetVerse, versionCode = 'fin2017', onBookSelect, onChapterSelect, onVerseSelect, showNextChapterInfo = true }: BibleReaderProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentVerse, setCurrentVerse] = useState(1);
   const [highlights, setHighlights] = useState<Set<number>>(new Set());
@@ -34,13 +35,13 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
   useEffect(() => {
     const fetchChapterData = async () => {
       setLoading(true);
-      const data = await getChapterData(book, chapter);
+      const data = await getChapterData(book, chapter, versionCode);
       setChapterData(data);
       setLoading(false);
       
       // Only show next chapter info if explicitly enabled and not navigating programmatically
       if (data && showNextChapterInfo && !isNavigating) {
-        const totalChapters = await getBookChapters(book);
+        const totalChapters = await getBookChapters(book, versionCode);
         const nextChapterInfo = generateNextChapterInfo(
           book, 
           chapter, 
@@ -57,7 +58,7 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
     };
 
     fetchChapterData();
-  }, [book, chapter]);
+  }, [book, chapter, versionCode]);
 
   // Set current verse when targetVerse changes
   useEffect(() => {
@@ -140,9 +141,9 @@ const BibleReader = ({ book, chapter, targetVerse, onBookSelect, onChapterSelect
       let navigationData;
       
       if (direction === 'next') {
-        navigationData = await getNextChapter(book, chapter);
+        navigationData = await getNextChapter(book, chapter, versionCode);
       } else {
-        navigationData = await getPreviousChapter(book, chapter);
+        navigationData = await getPreviousChapter(book, chapter, versionCode);
       }
       
       if (navigationData) {
