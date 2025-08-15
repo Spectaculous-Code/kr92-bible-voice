@@ -48,17 +48,19 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
       // Create OSIS reference from selected verse
       const osisRef = `${selectedVerse.bookName}.${selectedVerse.chapter}.${selectedVerse.verse}`;
       
-      // Fetch KJV verse with Strong's numbers
-      const { data, error } = await supabase.rpc('get_kjv_verse_with_strongs', {
-        p_osis: osisRef
-      });
+      // Try to use the database function first
+      const { data, error } = await supabase
+        .rpc('get_kjv_verse_with_strongs', { p_osis: osisRef });
 
       if (error) {
-        console.error('Error fetching KJV verse:', error);
-        // Fallback: try to construct the query manually
+        console.error('Error fetching KJV verse with function:', error);
+        // Fallback to manual query
         await fetchKJVVerseManual(osisRef);
-      } else if (data && data.length > 0) {
-        setKjvVerse(data[0]);
+      } else if (data && Array.isArray(data) && data.length > 0) {
+        setKjvVerse(data[0] as KJVVerseData);
+      } else {
+        // Try manual query as fallback
+        await fetchKJVVerseManual(osisRef);
       }
     } catch (error) {
       console.error('Error in fetchKJVVerse:', error);
@@ -83,19 +85,25 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
       const { data: verseData } = await supabase
         .from('verses')
         .select(`
+          id,
           text,
-          verse_keys!inner(osis),
-          kjv_strongs_words(word_text, word_order, strongs_number)
+          verse_keys!inner(osis)
         `)
         .eq('version_id', kjvVersion.id)
         .eq('verse_keys.osis', osisRef)
         .single();
 
       if (verseData) {
+        // Get Strong's words separately
+        const { data: strongsWords } = await supabase
+          .from('kjv_strongs_words')
+          .select('word_text, word_order, strongs_number')
+          .eq('verse_id', verseData.id)
+          .order('word_order');
+
         // Construct tagged text from Strong's words
-        const words = verseData.kjv_strongs_words || [];
+        const words = strongsWords || [];
         const taggedText = words
-          .sort((a, b) => a.word_order - b.word_order)
           .map(word => {
             if (word.strongs_number) {
               return `${word.word_text}<${word.strongs_number}>`;

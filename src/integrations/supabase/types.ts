@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "13.0.4"
@@ -218,6 +218,8 @@ export type Database = {
           created_at: string
           id: string
           name: string
+          name_abbreviation: string | null
+          name_localized: string | null
           testament: Database["public"]["Enums"]["testament_t"]
           version_id: string | null
         }
@@ -228,6 +230,8 @@ export type Database = {
           created_at?: string
           id?: string
           name: string
+          name_abbreviation?: string | null
+          name_localized?: string | null
           testament: Database["public"]["Enums"]["testament_t"]
           version_id?: string | null
         }
@@ -238,6 +242,8 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+          name_abbreviation?: string | null
+          name_localized?: string | null
           testament?: Database["public"]["Enums"]["testament_t"]
           version_id?: string | null
         }
@@ -356,6 +362,62 @@ export type Database = {
           },
         ]
       }
+      kjv_strongs_words: {
+        Row: {
+          created_at: string
+          id: string
+          strongs_number: string | null
+          verse_id: string | null
+          word_order: number
+          word_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          strongs_number?: string | null
+          verse_id?: string | null
+          word_order: number
+          word_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          strongs_number?: string | null
+          verse_id?: string | null
+          word_order?: number
+          word_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kjv_strongs_words_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "kjv_strongs_words_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_user_v"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "kjv_strongs_words_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "user_verse_counts_v"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "kjv_strongs_words_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -377,6 +439,77 @@ export type Database = {
           id?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      strongs_mappings: {
+        Row: {
+          created_at: string
+          id: string
+          strongs_number: string
+          verse_id: string
+          word_order: number
+          word_text: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          strongs_number: string
+          verse_id: string
+          word_order: number
+          word_text: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          strongs_number?: string
+          verse_id?: string
+          word_order?: number
+          word_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "strongs_mappings_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_mv"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "strongs_mappings_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "chapter_verses_user_v"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "strongs_mappings_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "user_verse_counts_v"
+            referencedColumns: ["verse_id"]
+          },
+          {
+            foreignKeyName: "strongs_mappings_verse_id_fkey"
+            columns: ["verse_id"]
+            isOneToOne: false
+            referencedRelation: "verses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tmp_fix_osis: {
+        Row: {
+          new_osis: string
+          old_osis: string
+        }
+        Insert: {
+          new_osis: string
+          old_osis: string
+        }
+        Update: {
+          new_osis?: string
+          old_osis?: string
         }
         Relationships: []
       }
@@ -621,6 +754,7 @@ export type Database = {
           chapter_id: string
           created_at: string
           id: string
+          is_superseded: boolean
           text: string
           text_search: unknown | null
           verse_key_id: string | null
@@ -632,6 +766,7 @@ export type Database = {
           chapter_id: string
           created_at?: string
           id?: string
+          is_superseded?: boolean
           text: string
           text_search?: unknown | null
           verse_key_id?: string | null
@@ -643,6 +778,7 @@ export type Database = {
           chapter_id?: string
           created_at?: string
           id?: string
+          is_superseded?: boolean
           text?: string
           text_search?: unknown | null
           verse_key_id?: string | null
@@ -769,7 +905,41 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      delete_kjv_strongs_words: {
+        Args: { p_verse_ids: string[] }
+        Returns: number
+      }
+      delete_noncanonical_verse_keys_batch: {
+        Args: { p_limit?: number }
+        Returns: number
+      }
+      delete_noncanonical_verse_keys_hard_batch: {
+        Args: { p_limit?: number }
+        Returns: number
+      }
+      delete_strongs_mappings: {
+        Args: { p_verse_ids: string[] }
+        Returns: number
+      }
+      get_kjv_verse_with_strongs: {
+        Args: { p_osis: string }
+        Returns: {
+          osis: string
+          plain_text: string
+          tagged_text: string
+        }[]
+      }
+      map_osis_to_verse_ids: {
+        Args: { p_osis: string[]; p_version_code: string }
+        Returns: {
+          osis: string
+          verse_id: string
+        }[]
+      }
+      osis_head_for_book: {
+        Args: { p_book_id: string }
+        Returns: string
+      }
     }
     Enums: {
       history_t: "read" | "listen"
