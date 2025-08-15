@@ -195,27 +195,26 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
   };
 
   const renderTaggedText = (taggedText: string) => {
-    // Parse the tagged text and create clickable Strong's numbers
+    // Parse the tagged text and create clickable Strong's words
     return taggedText.split(' ').map((word, index) => {
       const strongsMatch = word.match(/^(.+?)<(.+?)>$/);
       if (strongsMatch) {
         const [, wordText, strongsNum] = strongsMatch;
         return (
           <span key={index}>
-            {wordText}
             <Button
               variant="link"
               size="sm"
-              className="p-0 h-auto text-xs text-blue-600 hover:text-blue-800 ml-0.5"
+              className="p-0 h-auto text-base text-foreground hover:text-primary underline font-normal"
               onClick={() => handleStrongsClick(strongsNum)}
             >
-              [{strongsNum}]
+              {wordText}
             </Button>
             {index < taggedText.split(' ').length - 1 ? ' ' : ''}
           </span>
         );
       }
-      return <span key={index}>{word} </span>;
+      return <span key={index}>{word}{index < taggedText.split(' ').length - 1 ? ' ' : ''}</span>;
     });
   };
 
