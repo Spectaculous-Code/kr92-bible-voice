@@ -8,9 +8,10 @@ interface SearchResultsProps {
   onClose: () => void;
   onNavigateToVerse: (bookName: string, chapter: number, verse?: number, text?: string) => void;
   isLoading: boolean;
+  versionCode?: string; // Add version code prop
 }
 
-const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading }: SearchResultsProps) => {
+const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading, versionCode }: SearchResultsProps) => {
   if (!results && !isLoading) return null;
 
   return (
@@ -26,7 +27,9 @@ const SearchResults = ({ results, onClose, onNavigateToVerse, isLoading }: Searc
             )}
             <h2 className="text-lg font-semibold">
               {isLoading ? 'Etsitään...' : 
-               results?.type === 'reference' ? 'Raamatunviittaus' : 'Tekstihaku'}
+               results?.type === 'reference' 
+                 ? `Raamatunviittaus${versionCode ? ` (${versionCode})` : ''}` 
+                 : `Tekstihaku${versionCode ? ` (${versionCode})` : ''}`}
             </h2>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>

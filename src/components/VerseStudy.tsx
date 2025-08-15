@@ -361,7 +361,7 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
         <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>
-              Jakeet Strong's numerolla {selectedStrongsNumber?.split(', ')[0]}
+              Jakeet Strong's numerolla {selectedStrongsNumber?.split(', ')[0]} ({currentVersion || 'KJV'})
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto">

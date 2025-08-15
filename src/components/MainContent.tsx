@@ -159,6 +159,7 @@ const MainContent = ({
               onClose={() => setSearchResults(null)}
               onNavigateToVerse={handleNavigateToVerse}
               isLoading={isSearching}
+              versionCode={bibleVersions.find(v => v.id === selectedVersion)?.code}
             />
           </div>
         );

@@ -219,6 +219,7 @@ const Header = ({ selectedBook, selectedChapter, onBookSelect, onChapterSelect, 
         }}
         onNavigateToVerse={handleNavigateToVerse}
         isLoading={isSearching}
+        versionCode={bibleVersions.find(v => v.id === selectedVersion)?.code}
       />
     </header>
   );
