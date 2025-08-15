@@ -365,21 +365,51 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
           </DialogHeader>
           <div className="overflow-auto">
             {(() => {
-              console.log('Dialog open:', showStrongsSearch);
+              console.log('Rendering dialog content. Dialog open:', showStrongsSearch);
               console.log('strongsSearchResults:', strongsSearchResults);
               console.log('verses count:', strongsSearchResults?.verses?.length);
-              console.log('Sample verse:', strongsSearchResults?.verses?.[0]);
+              console.log('isSearchingStrongs:', isSearchingStrongs);
               return null;
             })()}
-            <SearchResults
-              results={strongsSearchResults ? {
-                verses: strongsSearchResults.verses,
-                type: 'text' as const
-              } : null}
-              onClose={() => setShowStrongsSearch(false)}
-              onNavigateToVerse={handleStrongsSearchNavigate}
-              isLoading={isSearchingStrongs}
-            />
+            {strongsSearchResults && strongsSearchResults.verses && strongsSearchResults.verses.length > 0 ? (
+              <div className="space-y-4">
+                {strongsSearchResults.verses.map((verse) => (
+                  <div 
+                    key={verse.id} 
+                    className="p-4 border rounded cursor-pointer hover:bg-accent transition-colors"
+                    onClick={() => handleStrongsSearchNavigate(verse.book_name, verse.chapter_number, verse.verse_number)}
+                  >
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="flex-1">
+                        <div className="text-sm text-muted-foreground mb-2">
+                          {verse.book_name} {verse.chapter_number}:{verse.verse_number}
+                        </div>
+                        <div className="text-base leading-relaxed">
+                          {verse.text}
+                        </div>
+                      </div>
+                      <button 
+                        className="px-3 py-1 text-sm bg-primary text-primary-foreground rounded hover:bg-primary/90"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleStrongsSearchNavigate(verse.book_name, verse.chapter_number, verse.verse_number);
+                        }}
+                      >
+                        Siirry
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : isSearchingStrongs ? (
+              <div className="text-center py-8 text-muted-foreground">
+                Ladataan hakutuloksia...
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Ei hakutuloksia
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
