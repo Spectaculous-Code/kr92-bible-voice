@@ -196,13 +196,14 @@ const VerseStudy = ({ selectedVerse, onBack }: VerseStudyProps) => {
 
   const renderTaggedText = (taggedText: string) => {
     // First, normalize the text to handle both "word<G123>" and "word <G123>" patterns
-    const normalizedText = taggedText.replace(/\s+<(G\d+)>/g, '<$1>');
+    // Handle both Greek (G) and Hebrew (H) Strong's numbers
+    const normalizedText = taggedText.replace(/\s+<([GH]\d+)>/g, '<$1>');
     
     // Parse the normalized text and create clickable Strong's words
     const words = normalizedText.split(' ');
     
     return words.map((word, index) => {
-      const strongsMatch = word.match(/^(.+?)<(.+?)>$/);
+      const strongsMatch = word.match(/^(.+?)<([GH].+?)>$/);
       if (strongsMatch) {
         const [, wordText, strongsNum] = strongsMatch;
         return (
