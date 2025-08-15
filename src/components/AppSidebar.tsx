@@ -130,6 +130,11 @@ export function AppSidebar({
     
     // Load last reading position from localStorage
     loadLastReadingPosition();
+
+    // Set up an interval to check for reading position updates
+    const positionCheckInterval = setInterval(loadLastReadingPosition, 2000);
+    
+    return () => clearInterval(positionCheckInterval);
   }, []);
 
   const loadLastReadingPosition = () => {
@@ -139,9 +144,14 @@ export function AppSidebar({
         const positionData = JSON.parse(savedPosition);
         setLastReadingData(positionData);
         setLastTextPosition(`${positionData.bookName} ${positionData.chapter}`);
+      } else {
+        setLastReadingData(null);
+        setLastTextPosition("Ei viimeisintä");
       }
     } catch (error) {
       console.error('Error loading reading position:', error);
+      setLastReadingData(null);
+      setLastTextPosition("Ei viimeisintä");
     }
   };
 

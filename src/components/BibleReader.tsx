@@ -32,6 +32,19 @@ const BibleReader = ({ book, chapter, targetVerse, versionCode = 'fin2017', onBo
   const audioRef = useRef<HTMLAudioElement>(null);
   const { toast } = useToast();
 
+  // Function to save reading position to localStorage
+  const saveReadingPosition = (bookName: string, chapterNum: number, version: string) => {
+    const currentPosition = {
+      book: bookName,
+      chapter: chapterNum,
+      bookName: getFinnishBookName(bookName),
+      versionCode: version,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('lastReadingPosition', JSON.stringify(currentPosition));
+    console.log('Saved reading position:', currentPosition);
+  };
+
   useEffect(() => {
     const fetchChapterData = async () => {
       setLoading(true);
@@ -41,15 +54,7 @@ const BibleReader = ({ book, chapter, targetVerse, versionCode = 'fin2017', onBo
       
       // Save current reading position to localStorage
       if (data) {
-        const currentPosition = {
-          book: book,
-          chapter: chapter,
-          bookName: getFinnishBookName(book),
-          versionCode: versionCode,
-          timestamp: Date.now()
-        };
-        localStorage.setItem('lastReadingPosition', JSON.stringify(currentPosition));
-        console.log('Saved reading position:', currentPosition);
+        saveReadingPosition(book, chapter, versionCode);
       }
       
       // Only show next chapter info if explicitly enabled and not navigating programmatically
