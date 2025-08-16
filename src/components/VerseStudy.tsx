@@ -46,6 +46,7 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
   const [strongsSearchResults, setStrongsSearchResults] = useState<StrongsSearchResult | null>(null);
   const [showStrongsSearch, setShowStrongsSearch] = useState(false);
   const [isSearchingStrongs, setIsSearchingStrongs] = useState(false);
+  const [lexiconCards, setLexiconCards] = useState<string[]>([]);
 
   useEffect(() => {
     fetchKJVVerse();
@@ -194,19 +195,17 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
 
   const handleStrongsClick = (strongsNumbers: string) => {
     setSelectedStrongsNumber(strongsNumbers);
-    // In a real implementation, you would fetch the Strong's definitions for all numbers
-    // For now, we'll show a placeholder for multiple numbers
-    const numbers = strongsNumbers.split(', ');
-    const definitionText = numbers.length > 1 
-      ? `Definitions for Strong's ${strongsNumbers} would appear here (multiple definitions)`
-      : `Definition for Strong's ${strongsNumbers} would appear here`;
-    
-    setStrongsDefinition({
-      number: strongsNumbers,
-      definition: definitionText,
-      partOfSpeech: numbers.length > 1 ? "multiple parts of speech" : "noun/verb/adjective",
-      transliteration: numbers.length > 1 ? "multiple transliterations" : "transliteration here"
-    });
+    // Add to lexicon cards if not already present
+    if (!lexiconCards.includes(strongsNumbers)) {
+      setLexiconCards([...lexiconCards, strongsNumbers]);
+    }
+  };
+
+  const handleStrongsLink = (strongsNumber: string) => {
+    // Add a new lexicon card for the referenced Strong's number
+    if (!lexiconCards.includes(strongsNumber)) {
+      setLexiconCards([...lexiconCards, strongsNumber]);
+    }
   };
 
   const handleStrongsSearch = async () => {
@@ -324,14 +323,20 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
         </CardContent>
       </Card>
 
-      {/* Strong's definition */}
-      {selectedStrongsNumber && (
-        <LexiconCard 
-          strongsNumber={selectedStrongsNumber}
-          onSearch={handleStrongsSearch}
-          isSearching={isSearchingStrongs}
-        />
-      )}
+      {/* Strong's lexicon cards */}
+      {lexiconCards.map((strongsNum, index) => (
+        <div key={strongsNum} className="mb-6">
+          <LexiconCard 
+            strongsNumber={strongsNum}
+            onSearch={() => {
+              setSelectedStrongsNumber(strongsNum);
+              handleStrongsSearch();
+            }}
+            isSearching={isSearchingStrongs && selectedStrongsNumber === strongsNum}
+            onStrongsLink={handleStrongsLink}
+          />
+        </div>
+      ))}
 
       {/* Strong's Search Results Dialog */}
       <Dialog open={showStrongsSearch} onOpenChange={setShowStrongsSearch}>

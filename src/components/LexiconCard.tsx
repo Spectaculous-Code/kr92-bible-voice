@@ -24,9 +24,10 @@ interface LexiconCardProps {
   strongsNumber: string;
   onSearch: () => void;
   isSearching?: boolean;
+  onStrongsLink?: (strongsNumber: string) => void;
 }
 
-const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCardProps) => {
+const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLink }: LexiconCardProps) => {
   const [lexiconData, setLexiconData] = useState<LexiconData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -83,6 +84,67 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
     return pronun ? `(${pronun})` : '';
   };
 
+  const fetchStrongsName = async (strongsNum: string): Promise<string> => {
+    try {
+      const { data, error } = await supabase
+        .from('strongs_lexicon' as any)
+        .select('lemma')
+        .eq('strongs_number', strongsNum)
+        .limit(1);
+      
+      if (!error && data && Array.isArray(data) && data.length > 0) {
+        const entry = data[0] as unknown as { lemma: string };
+        return entry.lemma || strongsNum;
+      }
+    } catch (error) {
+      console.error('Error fetching Strong\'s name:', error);
+    }
+    return strongsNum;
+  };
+
+  const parseAndRenderStrongsText = async (text: string) => {
+    // Extract all Strong's numbers from text like "from [[H8130]]" or "[[G2189]]"
+    const strongsMatches = text.match(/\[\[([GH]\d+)\]\]/g);
+    if (!strongsMatches) return text;
+
+    let processedText = text;
+    
+    // Process each Strong's reference
+    for (const match of strongsMatches) {
+      const strongsNum = match.replace(/\[\[|\]\]/g, '');
+      const englishName = await fetchStrongsName(strongsNum);
+      
+      // Replace the [[H1234]] with clickable link showing English name
+      const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
+      processedText = processedText.replace(match, linkElement);
+    }
+    
+    return processedText;
+  };
+
+  const renderStrongsText = (text: string) => {
+    const [processedText, setProcessedText] = useState(text);
+    
+    useEffect(() => {
+      parseAndRenderStrongsText(text).then(setProcessedText);
+    }, [text]);
+
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      const target = e.target as HTMLElement;
+      const strongsNum = target.dataset.strongs;
+      if (strongsNum && onStrongsLink) {
+        onStrongsLink(strongsNum);
+      }
+    };
+
+    return (
+      <div 
+        onClick={handleClick}
+        dangerouslySetInnerHTML={{ __html: processedText }}
+      />
+    );
+  };
+
   const renderReferences = (refs: string[], type: string) => {
     if (!refs?.length) return null;
     
@@ -91,7 +153,14 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
         <span className="font-semibold">{type}: </span>
         {refs.map((ref, index) => (
           <span key={index}>
-            [[{ref}]]
+            <Button
+              variant="link"
+              size="sm"
+              className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal"
+              onClick={() => onStrongsLink?.(ref)}
+            >
+              {ref}
+            </Button>
             {index < refs.length - 1 ? ', ' : ''}
           </span>
         ))}
@@ -166,7 +235,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
           {lexiconData.derivation && (
             <div>
               <span className="font-semibold">Derivation: </span>
-              <span>{lexiconData.derivation}</span>
+              {renderStrongsText(lexiconData.derivation)}
             </div>
           )}
           
@@ -195,7 +264,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
           {lexiconData.notes && (
             <div>
               <span className="font-semibold">Notes: </span>
-              <span>{lexiconData.notes}</span>
+              {renderStrongsText(lexiconData.notes)}
             </div>
           )}
 
