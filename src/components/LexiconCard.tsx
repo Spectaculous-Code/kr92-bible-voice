@@ -141,11 +141,11 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       processedText = processedText.replace(match, linkElement);
     }
     
-    // Process parentheses format (h0085) - replace entirely with English name
+    // Process parentheses format (h0085) - replace entirely with quoted English name
     for (const match of parenMatches) {
       const strongsNum = match.replace(/\(|\)/g, '').toUpperCase(); // Convert h0085 to H0085
       const englishName = await fetchStrongsName(strongsNum);
-      const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
+      const linkElement = `"<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>"`;
       processedText = processedText.replace(match, linkElement);
     }
     
@@ -259,8 +259,8 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       <CardContent>
         <div className="space-y-3">
           {lexiconData.derivation && (
-            <div>
-              <span className="font-semibold">Derivation: </span>
+            <div className="flex items-start gap-1">
+              <span className="font-semibold">Derivation:</span>
               {renderStrongsText(lexiconData.derivation, 'derivation')}
             </div>
           )}
