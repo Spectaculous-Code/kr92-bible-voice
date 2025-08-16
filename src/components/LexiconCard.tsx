@@ -202,11 +202,34 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
         <div className="flex items-start gap-1">
           <span className="font-semibold">{type}: </span>
           <div className="space-y-0">
-            {items.map((item, index) => (
-              <div key={index} className="ml-12">
-                {item}{index < items.length - 1 ? ',' : ''}
-              </div>
-            ))}
+            {items.map((item, index) => {
+              // Check if item is a Strong's number (starts with G or H followed by digits)
+              const strongsMatch = item.match(/^([GH]\d+)$/);
+              
+              if (strongsMatch) {
+                const normalizedRef = item.replace(/^([GH])0+/, '$1'); // Remove leading zeros
+                const displayName = referenceNames[item] || item;
+                return (
+                  <div key={index} className="ml-12">
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal text-left"
+                      onClick={() => onStrongsLink?.(normalizedRef)}
+                    >
+                      {displayName}
+                    </Button>
+                    {index < items.length - 1 ? ',' : ''}
+                  </div>
+                );
+              } else {
+                return (
+                  <div key={index} className="ml-12">
+                    {item}{index < items.length - 1 ? ',' : ''}
+                  </div>
+                );
+              }
+            })}
           </div>
         </div>
       );
