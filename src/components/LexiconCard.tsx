@@ -31,12 +31,33 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
   const [lexiconData, setLexiconData] = useState<LexiconData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [processedTexts, setProcessedTexts] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     if (strongsNumber) {
       fetchLexiconData();
     }
   }, [strongsNumber]);
+
+  useEffect(() => {
+    // Process texts when lexicon data changes
+    if (lexiconData) {
+      const textsToProcess: {[key: string]: string} = {};
+      
+      if (lexiconData.derivation) {
+        textsToProcess.derivation = lexiconData.derivation;
+      }
+      if (lexiconData.notes) {
+        textsToProcess.notes = lexiconData.notes;
+      }
+      
+      // Process all texts asynchronously
+      Object.entries(textsToProcess).forEach(async ([key, text]) => {
+        const processed = await parseAndRenderStrongsText(text);
+        setProcessedTexts(prev => ({ ...prev, [key]: processed }));
+      });
+    }
+  }, [lexiconData]);
 
   const fetchLexiconData = async () => {
     try {
@@ -102,7 +123,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
     return strongsNum;
   };
 
-  const parseAndRenderStrongsText = async (text: string) => {
+  const parseAndRenderStrongsText = async (text: string): Promise<string> => {
     // Extract all Strong's numbers from text like "from [[H8130]]" or "[[G2189]]"
     const strongsMatches = text.match(/\[\[([GH]\d+)\]\]/g);
     if (!strongsMatches) return text;
@@ -122,12 +143,8 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
     return processedText;
   };
 
-  const renderStrongsText = (text: string) => {
-    const [processedText, setProcessedText] = useState(text);
-    
-    useEffect(() => {
-      parseAndRenderStrongsText(text).then(setProcessedText);
-    }, [text]);
+  const renderStrongsText = (text: string, fieldKey: string) => {
+    const processedText = processedTexts[fieldKey] || text;
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       const target = e.target as HTMLElement;
@@ -235,7 +252,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
           {lexiconData.derivation && (
             <div>
               <span className="font-semibold">Derivation: </span>
-              {renderStrongsText(lexiconData.derivation)}
+              {renderStrongsText(lexiconData.derivation, 'derivation')}
             </div>
           )}
           
@@ -264,7 +281,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
           {lexiconData.notes && (
             <div>
               <span className="font-semibold">Notes: </span>
-              {renderStrongsText(lexiconData.notes)}
+              {renderStrongsText(lexiconData.notes, 'notes')}
             </div>
           )}
 
