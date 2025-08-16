@@ -193,30 +193,20 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
   const renderReferences = (refs: string[], type: string) => {
     if (!refs?.length) return null;
     
-    const isLastItem = (index: number) => index === refs.length - 1;
-    
     if (type === 'See also') {
+      // Join all array items and split by commas for individual display
+      const allItems = refs.join(', ');
+      const items = allItems.split(',').map(item => item.trim()).filter(item => item.length > 0);
+      
       return (
         <div className="flex items-start gap-1">
           <span className="font-semibold">{type}: </span>
-          <div className="space-y-1">
-            {refs.map((ref, index) => {
-              const normalizedRef = ref.replace(/^([HG])0+/, '$1'); // Remove leading zeros
-              const displayName = referenceNames[ref] || ref;
-              return (
-                <div key={index} className="flex items-start gap-1">
-                  <span>-</span>
-                  <Button
-                    variant="link"
-                    size="sm"
-                    className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal text-left"
-                    onClick={() => onStrongsLink?.(normalizedRef)}
-                  >
-                    {displayName}
-                  </Button>
-                </div>
-              );
-            })}
+          <div className="space-y-0">
+            {items.map((item, index) => (
+              <div key={index} className="ml-12">
+                {item}{index < items.length - 1 ? ',' : ''}
+              </div>
+            ))}
           </div>
         </div>
       );
