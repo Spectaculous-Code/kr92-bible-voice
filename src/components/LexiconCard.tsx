@@ -46,7 +46,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
       const firstNumber = strongsNumber.split(', ')[0];
       console.log('Fetching lexicon data for:', firstNumber);
       
-      // Query the strongs_lexicon table directly with a raw query
+      // Query the strongs_lexicon table directly
       const { data, error } = await supabase
         .from('strongs_lexicon' as any)
         .select('*')
