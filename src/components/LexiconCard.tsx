@@ -46,18 +46,20 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false }: LexiconCa
       const firstNumber = strongsNumber.split(', ')[0];
       console.log('Fetching lexicon data for:', firstNumber);
       
+      // Query the strongs_lexicon table directly with a raw query
       const { data, error } = await supabase
         .from('strongs_lexicon' as any)
         .select('*')
         .eq('strongs_number', firstNumber)
-        .single();
+        .limit(1);
 
       if (error) {
         console.error('Error fetching lexicon data:', error);
         setError('Lexicon data not found');
-      } else if (data) {
-        setLexiconData(data as LexiconData);
-        console.log('Lexicon data fetched:', data);
+      } else if (data && Array.isArray(data) && data.length > 0) {
+        const lexiconEntry = data[0] as unknown as LexiconData;
+        setLexiconData(lexiconEntry);
+        console.log('Lexicon data fetched:', lexiconEntry);
       } else {
         setError('No lexicon data found for this Strong\'s number');
       }
