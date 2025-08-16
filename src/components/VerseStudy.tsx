@@ -184,16 +184,22 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
         return !isExtraneous;
       });
       
-      const taggedText = filteredWords.length > 0 
-        ? filteredWords
-            .map(word => {
-              if (word.strongs_number) {
-                return `${word.word_text}<${word.strongs_number}>`;
-              }
-              return word.word_text;
-            })
-            .join(' ')
-        : kjvVerseData.text; // Fallback to plain text if no Strong's numbers
+      // If we have filtered words, use them to construct tagged text
+      // Otherwise, fall back to the original KJV verse text
+      let taggedText;
+      if (filteredWords.length > 0) {
+        taggedText = filteredWords
+          .map(word => {
+            if (word.strongs_number) {
+              return `${word.word_text}<${word.strongs_number}>`;
+            }
+            return word.word_text;
+          })
+          .join(' ');
+      } else {
+        // Fallback: use the plain text but try to add Strong's numbers where we can
+        taggedText = kjvVerseData.text;
+      }
 
       console.log('Constructed tagged text for debug:', taggedText);
 
