@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, ArrowLeft } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface LexiconData {
@@ -25,9 +25,10 @@ interface LexiconCardProps {
   onSearch: () => void;
   isSearching?: boolean;
   onStrongsLink?: (strongsNumber: string) => void;
+  onBack?: () => void;
 }
 
-const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLink }: LexiconCardProps) => {
+const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLink, onBack }: LexiconCardProps) => {
   const [lexiconData, setLexiconData] = useState<LexiconData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -255,11 +256,23 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex flex-col gap-1">
-            <div className="text-lg">
-              Strong's {lexiconData.strongs_number}: {lexiconData.lemma}
-              {lexiconData.transliterations?.[0] && (
-                <span className="ml-2 font-normal">, {lexiconData.transliterations[0]}</span>
+            <div className="flex items-center gap-2">
+              {onBack && (
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={onBack}
+                  className="p-1 h-auto"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
               )}
+              <div className="text-lg">
+                Strong's {lexiconData.strongs_number}: {lexiconData.lemma}
+                {lexiconData.transliterations?.[0] && (
+                  <span className="ml-2 font-normal">, {lexiconData.transliterations[0]}</span>
+                )}
+              </div>
             </div>
             {formatTransliterations(lexiconData.transliterations, lexiconData.pronunciations) && (
               <div className="text-sm text-muted-foreground font-normal">

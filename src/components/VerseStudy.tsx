@@ -46,7 +46,8 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
   const [strongsSearchResults, setStrongsSearchResults] = useState<StrongsSearchResult | null>(null);
   const [showStrongsSearch, setShowStrongsSearch] = useState(false);
   const [isSearchingStrongs, setIsSearchingStrongs] = useState(false);
-  const [lexiconCards, setLexiconCards] = useState<string[]>([]);
+  const [strongsHistory, setStrongsHistory] = useState<string[]>([]);
+  const [currentStrongsIndex, setCurrentStrongsIndex] = useState<number>(-1);
 
   useEffect(() => {
     fetchKJVVerse();
@@ -195,16 +196,27 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
 
   const handleStrongsClick = (strongsNumbers: string) => {
     setSelectedStrongsNumber(strongsNumbers);
-    // Add to lexicon cards if not already present
-    if (!lexiconCards.includes(strongsNumbers)) {
-      setLexiconCards([...lexiconCards, strongsNumbers]);
-    }
+    // Add to history - if we're not at the end, truncate history after current position
+    const newHistory = currentStrongsIndex >= 0 
+      ? [...strongsHistory.slice(0, currentStrongsIndex + 1), strongsNumbers]
+      : [strongsNumbers];
+    setStrongsHistory(newHistory);
+    setCurrentStrongsIndex(newHistory.length - 1);
   };
 
   const handleStrongsLink = (strongsNumber: string) => {
-    // Add a new lexicon card for the referenced Strong's number
-    if (!lexiconCards.includes(strongsNumber)) {
-      setLexiconCards([...lexiconCards, strongsNumber]);
+    setSelectedStrongsNumber(strongsNumber);
+    // Add to history after current position, removing any future history
+    const newHistory = [...strongsHistory.slice(0, currentStrongsIndex + 1), strongsNumber];
+    setStrongsHistory(newHistory);
+    setCurrentStrongsIndex(newHistory.length - 1);
+  };
+
+  const handleStrongsBack = () => {
+    if (currentStrongsIndex > 0) {
+      const newIndex = currentStrongsIndex - 1;
+      setCurrentStrongsIndex(newIndex);
+      setSelectedStrongsNumber(strongsHistory[newIndex]);
     }
   };
 
@@ -323,20 +335,18 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
         </CardContent>
       </Card>
 
-      {/* Strong's lexicon cards */}
-      {lexiconCards.map((strongsNum, index) => (
-        <div key={strongsNum} className="mb-6">
+      {/* Strong's lexicon card with history */}
+      {currentStrongsIndex >= 0 && strongsHistory[currentStrongsIndex] && (
+        <div className="mb-6">
           <LexiconCard 
-            strongsNumber={strongsNum}
-            onSearch={() => {
-              setSelectedStrongsNumber(strongsNum);
-              handleStrongsSearch();
-            }}
-            isSearching={isSearchingStrongs && selectedStrongsNumber === strongsNum}
+            strongsNumber={strongsHistory[currentStrongsIndex]}
+            onSearch={handleStrongsSearch}
+            isSearching={isSearchingStrongs}
             onStrongsLink={handleStrongsLink}
+            onBack={currentStrongsIndex > 0 ? handleStrongsBack : undefined}
           />
         </div>
-      ))}
+      )}
 
       {/* Strong's Search Results Dialog */}
       <Dialog open={showStrongsSearch} onOpenChange={setShowStrongsSearch}>
