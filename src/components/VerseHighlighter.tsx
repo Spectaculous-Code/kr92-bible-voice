@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Highlighter, MessageSquare, Share } from "lucide-react";
+import { Highlighter, MessageSquare, Share, BookOpen } from "lucide-react";
 
 interface Verse {
   number: number;
@@ -13,6 +14,8 @@ interface VerseHighlighterProps {
   isCurrentVerse: boolean;
   onHighlight: () => void;
   onVerseClick: () => void;
+  book?: string;
+  chapter?: number;
 }
 
 const VerseHighlighter = ({ 
@@ -20,9 +23,12 @@ const VerseHighlighter = ({
   isHighlighted, 
   isCurrentVerse, 
   onHighlight, 
-  onVerseClick 
+  onVerseClick,
+  book,
+  chapter
 }: VerseHighlighterProps) => {
   const [showActions, setShowActions] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div 
@@ -83,6 +89,19 @@ const VerseHighlighter = ({
             }}
           >
             <Share className="h-4 w-4" />
+          </Button>
+          
+          <Button 
+            variant="ghost" 
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              if (book && chapter) {
+                navigate(`/study/${book}/${chapter}/${verse.number}`);
+              }
+            }}
+          >
+            <BookOpen className="h-4 w-4" />
           </Button>
         </div>
       </div>

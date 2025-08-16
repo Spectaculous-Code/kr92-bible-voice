@@ -261,6 +261,8 @@ const BibleReader = ({ book, chapter, targetVerse, versionCode = 'fin2017', onBo
                 setCurrentVerse(verse.verse_number);
                 onVerseSelect(book, chapter, verse.verse_number, verse.text);
               }}
+              book={book}
+              chapter={chapter}
             />
           ))}
         </div>
