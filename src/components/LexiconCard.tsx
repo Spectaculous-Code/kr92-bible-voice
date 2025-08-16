@@ -193,6 +193,35 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
   const renderReferences = (refs: string[], type: string) => {
     if (!refs?.length) return null;
     
+    const isLastItem = (index: number) => index === refs.length - 1;
+    
+    if (type === 'See also') {
+      return (
+        <div className="flex items-start gap-1">
+          <span className="font-semibold">{type}: </span>
+          <div className="space-y-1">
+            {refs.map((ref, index) => {
+              const normalizedRef = ref.replace(/^([HG])0+/, '$1'); // Remove leading zeros
+              const displayName = referenceNames[ref] || ref;
+              return (
+                <div key={index} className="flex items-start gap-1">
+                  <span>-</span>
+                  <Button
+                    variant="link"
+                    size="sm"
+                    className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal text-left"
+                    onClick={() => onStrongsLink?.(normalizedRef)}
+                  >
+                    {displayName}
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    
     return (
       <div>
         <span className="font-semibold">{type}: </span>
