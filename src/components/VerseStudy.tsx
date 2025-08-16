@@ -173,22 +173,26 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
       console.log('Strong\'s words for debug:', words);
       console.log('KJV verse text for debug:', kjvVerseData.text);
       
-      // Filter out words that contain "David's", "Psalm", "praise" or similar extraneous content
-      // that doesn't belong to the actual verse text
+      // Filter out words that contain extraneous content that doesn't belong to the verse
       const filteredWords = words.filter(word => {
         const wordText = word.word_text?.toLowerCase() || '';
+        // Filter out obvious extraneous content
         const isExtraneous = wordText.includes('david') || 
                             wordText.includes('psalm') || 
                             wordText.includes('praise') ||
-                            wordText.startsWith('<') && wordText.endsWith('>'); // Filter out standalone Strong's references like <G5547>
+                            (wordText.startsWith('<') && wordText.endsWith('>')); // Filter out standalone Strong's references
         return !isExtraneous;
       });
       
-      // If we have filtered words, use them to construct tagged text
-      // Otherwise, fall back to the original KJV verse text
+      // Split the original KJV text into words to compare length and detect extra words
+      const originalWords = kjvVerseData.text.split(/\s+/).filter(w => w.length > 0);
+      
+      // Use filtered words but limit to the length of original text to avoid extra words
       let taggedText;
       if (filteredWords.length > 0) {
-        taggedText = filteredWords
+        // Only use words up to the original verse length to avoid extra content
+        const relevantWords = filteredWords.slice(0, originalWords.length);
+        taggedText = relevantWords
           .map(word => {
             if (word.strongs_number) {
               return `${word.word_text}<${word.strongs_number}>`;
@@ -197,7 +201,7 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
           })
           .join(' ');
       } else {
-        // Fallback: use the plain text but try to add Strong's numbers where we can
+        // Fallback: use the original KJV text
         taggedText = kjvVerseData.text;
       }
 
