@@ -275,9 +275,9 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
             </div>
           )}
           
-          <div>
+          <div className="flex items-start gap-1">
             <span className="font-semibold">Definition:</span>
-            <div className="mt-1 space-y-2">
+            <div className="space-y-2">
               {lexiconData.definition_short && (
                 <div>{lexiconData.definition_short}</div>
               )}
