@@ -141,12 +141,12 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       processedText = processedText.replace(match, linkElement);
     }
     
-    // Process parentheses format (h0085)
+    // Process parentheses format (h0085) - replace entirely with English name
     for (const match of parenMatches) {
       const strongsNum = match.replace(/\(|\)/g, '').toUpperCase(); // Convert h0085 to H0085
       const englishName = await fetchStrongsName(strongsNum);
       const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
-      processedText = processedText.replace(match, `(${linkElement})`);
+      processedText = processedText.replace(match, linkElement);
     }
     
     return processedText;
