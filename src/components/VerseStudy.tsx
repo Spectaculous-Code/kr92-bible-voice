@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import SearchResults from "./SearchResults";
 import { searchByStrongsNumber, StrongsSearchResult } from "@/lib/strongsSearchService";
 import { SearchResult } from "@/lib/searchService";
+import LexiconCard from "./LexiconCard";
 
 interface SelectedVerse {
   bookName: string;
@@ -324,39 +325,12 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
       </Card>
 
       {/* Strong's definition */}
-      {selectedStrongsNumber && strongsDefinition && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span className="text-lg">Strong's {selectedStrongsNumber}</span>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={handleStrongsSearch}
-                disabled={isSearchingStrongs}
-              >
-                <Search className="h-4 w-4 mr-2" />
-                {isSearchingStrongs ? 'Etsitään...' : 'Hae jakeita'}
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <div>
-                <span className="font-semibold">Määritelmä: </span>
-                <span>{strongsDefinition.definition}</span>
-              </div>
-              <div>
-                <span className="font-semibold">Sanaluokka: </span>
-                <span>{strongsDefinition.partOfSpeech}</span>
-              </div>
-              <div>
-                <span className="font-semibold">Translitteraatio: </span>
-                <span>{strongsDefinition.transliteration}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {selectedStrongsNumber && (
+        <LexiconCard 
+          strongsNumber={selectedStrongsNumber}
+          onSearch={handleStrongsSearch}
+          isSearching={isSearchingStrongs}
+        />
       )}
 
       {/* Strong's Search Results Dialog */}
