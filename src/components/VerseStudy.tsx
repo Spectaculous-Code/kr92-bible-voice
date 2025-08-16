@@ -343,7 +343,9 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <span className="text-lg">KJV Strong numeroilla</span>
+            <span className="text-lg">
+              {selectedVerse.bookName}.{selectedVerse.chapter}:{selectedVerse.verse} <span className="text-muted-foreground">(KJV Strongs)</span>
+            </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
