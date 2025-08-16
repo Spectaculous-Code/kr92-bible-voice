@@ -32,6 +32,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [processedTexts, setProcessedTexts] = useState<{[key: string]: string}>({});
+  const [referenceNames, setReferenceNames] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     if (strongsNumber) {
@@ -61,6 +62,13 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       Object.entries(textsToProcess).forEach(async ([key, text]) => {
         const processed = await parseAndRenderStrongsText(text);
         setProcessedTexts(prev => ({ ...prev, [key]: processed }));
+      });
+
+      // Process reference names
+      const allRefs = [...(lexiconData.compare || []), ...(lexiconData.see_also || [])];
+      allRefs.forEach(async (ref) => {
+        const englishName = await fetchStrongsName(ref);
+        setReferenceNames(prev => ({ ...prev, [ref]: englishName }));
       });
     }
   }, [lexiconData]);
@@ -187,19 +195,23 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
     return (
       <div>
         <span className="font-semibold">{type}: </span>
-        {refs.map((ref, index) => (
-          <span key={index}>
-            <Button
-              variant="link"
-              size="sm"
-              className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal"
-              onClick={() => onStrongsLink?.(ref)}
-            >
-              {ref}
-            </Button>
-            {index < refs.length - 1 ? ', ' : ''}
-          </span>
-        ))}
+        {refs.map((ref, index) => {
+          const normalizedRef = ref.replace(/^([HG])0+/, '$1'); // Remove leading zeros
+          const displayName = referenceNames[ref] || ref;
+          return (
+            <span key={index}>
+              <Button
+                variant="link"
+                size="sm"
+                className="p-0 h-auto text-base text-primary hover:text-primary/80 underline font-normal"
+                onClick={() => onStrongsLink?.(normalizedRef)}
+              >
+                {displayName}
+              </Button>
+              {index < refs.length - 1 ? ', ' : ''}
+            </span>
+          );
+        })}
       </div>
     );
   };
