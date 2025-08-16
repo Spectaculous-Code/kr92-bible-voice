@@ -170,8 +170,22 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
 
       // Construct tagged text from Strong's words
       const words = strongsWords || [];
-      const taggedText = words.length > 0 
-        ? words
+      console.log('Strong\'s words for debug:', words);
+      console.log('KJV verse text for debug:', kjvVerseData.text);
+      
+      // Filter out words that contain "David's", "Psalm", "praise" or similar extraneous content
+      // that doesn't belong to the actual verse text
+      const filteredWords = words.filter(word => {
+        const wordText = word.word_text?.toLowerCase() || '';
+        const isExtraneous = wordText.includes('david') || 
+                            wordText.includes('psalm') || 
+                            wordText.includes('praise') ||
+                            wordText.startsWith('<') && wordText.endsWith('>'); // Filter out standalone Strong's references like <G5547>
+        return !isExtraneous;
+      });
+      
+      const taggedText = filteredWords.length > 0 
+        ? filteredWords
             .map(word => {
               if (word.strongs_number) {
                 return `${word.word_text}<${word.strongs_number}>`;
@@ -180,6 +194,8 @@ const VerseStudy = ({ selectedVerse, onBack, currentVersion }: VerseStudyProps) 
             })
             .join(' ')
         : kjvVerseData.text; // Fallback to plain text if no Strong's numbers
+
+      console.log('Constructed tagged text for debug:', taggedText);
 
       const osisRef = `${bookName}.${chapterNum}.${verseNum}`;
       setKjvVerse({
