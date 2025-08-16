@@ -69,13 +69,15 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       
       // Clean the Strong's number - handle multiple numbers by taking the first one
       const firstNumber = strongsNumber.split(', ')[0];
-      console.log('Fetching lexicon data for:', firstNumber);
+      // Normalize Strong's number by removing leading zeros (H0085 -> H85)
+      const normalizedNumber = firstNumber.replace(/^([HG])0+/, '$1');
+      console.log('Fetching lexicon data for:', firstNumber, 'normalized to:', normalizedNumber);
       
       // Query the strongs_lexicon table directly
       const { data, error } = await supabase
         .from('strongs_lexicon' as any)
         .select('*')
-        .eq('strongs_number', firstNumber)
+        .eq('strongs_number', normalizedNumber)
         .limit(1);
 
       if (error) {
@@ -110,10 +112,13 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
 
   const fetchStrongsName = async (strongsNum: string): Promise<string> => {
     try {
+      // Normalize Strong's number by removing leading zeros (H0085 -> H85)
+      const normalizedNum = strongsNum.replace(/^([HG])0+/, '$1');
+      
       const { data, error } = await supabase
         .from('strongs_lexicon' as any)
         .select('lemma')
-        .eq('strongs_number', strongsNum)
+        .eq('strongs_number', normalizedNum)
         .limit(1);
       
       if (!error && data && Array.isArray(data) && data.length > 0) {
@@ -136,16 +141,18 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
     // Process bracket format [[H1234]]
     for (const match of bracketMatches) {
       const strongsNum = match.replace(/\[\[|\]\]/g, '');
+      const normalizedNum = strongsNum.replace(/^([HG])0+/, '$1'); // Remove leading zeros
       const englishName = await fetchStrongsName(strongsNum);
-      const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
+      const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${normalizedNum}">${englishName}</span>`;
       processedText = processedText.replace(match, linkElement);
     }
     
     // Process parentheses format (h0085) - replace entirely with quoted English name
     for (const match of parenMatches) {
       const strongsNum = match.replace(/\(|\)/g, '').toUpperCase(); // Convert h0085 to H0085
+      const normalizedNum = strongsNum.replace(/^([HG])0+/, '$1'); // Remove leading zeros
       const englishName = await fetchStrongsName(strongsNum);
-      const linkElement = `"<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>"`;
+      const linkElement = `"<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${normalizedNum}">${englishName}</span>"`;
       processedText = processedText.replace(match, linkElement);
     }
     
