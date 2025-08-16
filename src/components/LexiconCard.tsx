@@ -50,6 +50,9 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
       if (lexiconData.notes) {
         textsToProcess.notes = lexiconData.notes;
       }
+      if (lexiconData.definition_long) {
+        textsToProcess.definition_long = lexiconData.definition_long;
+      }
       
       // Process all texts asynchronously
       Object.entries(textsToProcess).forEach(async ([key, text]) => {
@@ -124,20 +127,26 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
   };
 
   const parseAndRenderStrongsText = async (text: string): Promise<string> => {
-    // Extract all Strong's numbers from text like "from [[H8130]]" or "[[G2189]]"
-    const strongsMatches = text.match(/\[\[([GH]\d+)\]\]/g);
-    if (!strongsMatches) return text;
-
+    // Extract all Strong's numbers from text like "from [[H8130]]", "[[G2189]]", or "(h0085)"
+    const bracketMatches = text.match(/\[\[([GH]\d+)\]\]/g) || [];
+    const parenMatches = text.match(/\(([gh]\d+)\)/gi) || [];
+    
     let processedText = text;
     
-    // Process each Strong's reference
-    for (const match of strongsMatches) {
+    // Process bracket format [[H1234]]
+    for (const match of bracketMatches) {
       const strongsNum = match.replace(/\[\[|\]\]/g, '');
       const englishName = await fetchStrongsName(strongsNum);
-      
-      // Replace the [[H1234]] with clickable link showing English name
       const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
       processedText = processedText.replace(match, linkElement);
+    }
+    
+    // Process parentheses format (h0085)
+    for (const match of parenMatches) {
+      const strongsNum = match.replace(/\(|\)/g, '').toUpperCase(); // Convert h0085 to H0085
+      const englishName = await fetchStrongsName(strongsNum);
+      const linkElement = `<span class="cursor-pointer text-primary hover:text-primary/80 underline" data-strongs="${strongsNum}">${englishName}</span>`;
+      processedText = processedText.replace(match, `(${linkElement})`);
     }
     
     return processedText;
@@ -266,7 +275,7 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
                 <div className="text-muted-foreground italic">{lexiconData.definition_lit}</div>
               )}
               {lexiconData.definition_long && (
-                <div>"{lexiconData.definition_long}"</div>
+                <div>{renderStrongsText(lexiconData.definition_long, 'definition_long')}</div>
               )}
             </div>
           </div>
