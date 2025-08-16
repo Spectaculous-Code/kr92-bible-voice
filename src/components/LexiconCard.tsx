@@ -287,8 +287,9 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
               {lexiconData.definition_long && (
                 <div>
                   {lexiconData.definition_long.split(';').map((part, index) => (
-                    <div key={index} className="mb-1">
-                      - {renderStrongsText(part.trim(), `definition_long_${index}`)}
+                    <div key={index} className="mb-1 flex items-start gap-1">
+                      <span>-</span>
+                      <div>{renderStrongsText(part.trim(), `definition_long_${index}`)}</div>
                     </div>
                   ))}
                 </div>
