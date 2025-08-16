@@ -51,7 +51,10 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
         textsToProcess.notes = lexiconData.notes;
       }
       if (lexiconData.definition_long) {
-        textsToProcess.definition_long = lexiconData.definition_long;
+        // Split definition_long by semicolon and process each part separately
+        lexiconData.definition_long.split(';').forEach((part, index) => {
+          textsToProcess[`definition_long_${index}`] = part.trim();
+        });
       }
       
       // Process all texts asynchronously
@@ -282,7 +285,13 @@ const LexiconCard = ({ strongsNumber, onSearch, isSearching = false, onStrongsLi
                 <div className="text-muted-foreground italic">{lexiconData.definition_lit}</div>
               )}
               {lexiconData.definition_long && (
-                <div>{renderStrongsText(lexiconData.definition_long, 'definition_long')}</div>
+                <div>
+                  {lexiconData.definition_long.split(';').map((part, index) => (
+                    <div key={index} className="mb-1">
+                      {renderStrongsText(part.trim(), `definition_long_${index}`)}
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
