@@ -10,7 +10,8 @@ import {
   Star, 
   Highlighter,
   ChevronDown,
-  ChevronRight
+  ChevronRight,
+  User
 } from "lucide-react";
 import {
   Sidebar,
@@ -318,6 +319,16 @@ export function AppSidebar({
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
+              {/* Profile */}
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  onClick={() => window.location.href = '/profile'}
+                >
+                  <User className="h-4 w-4" />
+                  {!collapsed && <span>Profiili</span>}
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
               {/* My Summaries */}
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={onNavigateToSummaries}>
