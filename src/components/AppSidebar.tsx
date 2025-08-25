@@ -31,6 +31,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { getFinnishBookName } from "@/lib/bookNameMapping";
+import UserMenu from "@/components/UserMenu";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AppSidebarProps {
   onNavigateToSearch: (query: string) => void;
@@ -56,6 +58,7 @@ export function AppSidebar({
 }: AppSidebarProps) {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchHistory, setShowSearchHistory] = useState(false);
   const [lastAudioPosition, setLastAudioPosition] = useState<string>("Ei viimeisintä");
@@ -67,7 +70,6 @@ export function AppSidebar({
 
   useEffect(() => {
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
       // Fetch last audio position
@@ -135,7 +137,7 @@ export function AppSidebar({
     const positionCheckInterval = setInterval(loadLastReadingPosition, 2000);
     
     return () => clearInterval(positionCheckInterval);
-  }, []);
+  }, [user]);
 
   const loadLastReadingPosition = () => {
     try {
@@ -184,7 +186,10 @@ export function AppSidebar({
       <SidebarHeader className="border-b border-border p-4">
         <div className="flex items-center justify-between">
           {!collapsed && <h1 className="text-lg font-semibold text-foreground">Raamattu Nyt</h1>}
-          <SidebarTrigger className="h-6 w-6" />
+          <div className="flex items-center gap-2">
+            {!collapsed && <UserMenu />}
+            <SidebarTrigger className="h-6 w-6" />
+          </div>
         </div>
       </SidebarHeader>
 

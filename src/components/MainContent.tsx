@@ -4,6 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Play, Pause, SkipBack, SkipForward, Volume2, Bookmark } from "lucide-react";
 import BibleReader from "./BibleReader";
 import SearchResults from "./SearchResults";
+import UserSummaries from "./UserSummaries";
+import UserHighlights from "./UserHighlights";
 import { performSearch, SearchResult } from "@/lib/searchService";
 import { getBibleBooks, BibleBook } from "@/lib/bibleService";
 import { getFinnishBookName, getEnglishBookName } from "@/lib/bookNameMapping";
@@ -165,20 +167,10 @@ const MainContent = ({
         );
       
       case 'summaries':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Koosteeni</h2>
-            <p className="text-muted-foreground">Koosteesi näkyvät täällä.</p>
-          </div>
-        );
+        return <UserSummaries />;
       
       case 'highlights':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Korostukset</h2>
-            <p className="text-muted-foreground">Korostuksesi näkyvät täällä.</p>
-          </div>
-        );
+        return <UserHighlights />;
       
       default:
         const currentVersionCode = bibleVersions.find(v => v.id === selectedVersion)?.code || 'fin2017';
