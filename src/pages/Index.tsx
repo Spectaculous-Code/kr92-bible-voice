@@ -2,6 +2,9 @@ import { useState } from "react";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import MainContent from "@/components/MainContent";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Index = () => {
   const [selectedBook, setSelectedBook] = useState("");
@@ -61,14 +64,28 @@ const Index = () => {
     setCurrentView('bible');
   };
 
+  const [topSearchQuery, setTopSearchQuery] = useState("");
+
   const handleVerseSelect = (bookName: string, chapter: number, verse: number, text: string) => {
     setSelectedVerse({ bookName, chapter, verse, text });
+  };
+
+  const handleTopSearch = (query: string) => {
+    if (query.trim()) {
+      setSearchQuery(query);
+      setCurrentView('search');
+    }
+  };
+
+  const handleTopSearchKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleTopSearch(topSearchQuery);
+    }
   };
 
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
-
         <AppSidebar 
           onNavigateToSearch={handleNavigateToSearch}
           onNavigateToContinueAudio={handleNavigateToContinueAudio}
@@ -78,17 +95,48 @@ const Index = () => {
           selectedVerse={selectedVerse}
         />
 
-        <MainContent
-          selectedBook={selectedBook}
-          selectedChapter={selectedChapter}
-          targetVerse={targetVerse}
-          onBookSelect={handleBookSelect}
-          onChapterSelect={handleChapterSelect}
-          onNavigateToVerse={handleNavigateToVerse}
-          onVerseSelect={handleVerseSelect}
-          currentView={currentView}
-          searchQuery={searchQuery}
-        />
+        <div className="flex-1 flex flex-col">
+          {/* Top Header */}
+          <header className="bg-background border-b border-border p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <SidebarTrigger />
+              </div>
+              
+              <div className="flex items-center gap-4">
+                <Link 
+                  to="/" 
+                  className="text-xl font-bold text-foreground hover:text-primary transition-colors"
+                >
+                  Raamattu Nyt
+                </Link>
+                
+                <div className="relative w-64">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Vapaa haku..."
+                    className="pl-10"
+                    value={topSearchQuery}
+                    onChange={(e) => setTopSearchQuery(e.target.value)}
+                    onKeyPress={handleTopSearchKeyPress}
+                  />
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <MainContent
+            selectedBook={selectedBook}
+            selectedChapter={selectedChapter}
+            targetVerse={targetVerse}
+            onBookSelect={handleBookSelect}
+            onChapterSelect={handleChapterSelect}
+            onNavigateToVerse={handleNavigateToVerse}
+            onVerseSelect={handleVerseSelect}
+            currentView={currentView}
+            searchQuery={searchQuery}
+          />
+        </div>
       </div>
     </SidebarProvider>
   );
