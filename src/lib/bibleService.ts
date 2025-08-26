@@ -97,6 +97,9 @@ export const getBibleBooks = async (versionCode: string = 'fin2017'): Promise<Bi
     
     console.log('Books found:', booksResponse.data.length);
     
+    // Log all book names for debugging
+    console.log('Available book names:', booksResponse.data.map((b: any) => b.name));
+    
     // Map to our interface
     const books: BibleBook[] = booksResponse.data.map((book: any) => ({
       id: book.id,
