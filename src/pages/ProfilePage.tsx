@@ -76,20 +76,8 @@ const ProfilePage = () => {
         <p className="text-muted-foreground">Hallitse profiiliasi ja näe aktiviteettisi</p>
       </div>
 
-      <Tabs defaultValue="profile" className="space-y-4">
+      <Tabs defaultValue="reading-history" className="space-y-4">
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger value="profile" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Asetukset
-          </TabsTrigger>
-          <TabsTrigger value="summaries" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Koosteeni
-          </TabsTrigger>
-          <TabsTrigger value="highlights" className="flex items-center gap-2">
-            <Highlighter className="h-4 w-4" />
-            Korostukseni
-          </TabsTrigger>
           <TabsTrigger value="reading-history" className="flex items-center gap-2">
             <BookOpen className="h-4 w-4" />
             Lukuhistoria
@@ -101,6 +89,18 @@ const ProfilePage = () => {
           <TabsTrigger value="reading-plan" className="flex items-center gap-2" disabled>
             <Calendar className="h-4 w-4" />
             Lukusuunnitelma
+          </TabsTrigger>
+          <TabsTrigger value="summaries" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Koosteeni
+          </TabsTrigger>
+          <TabsTrigger value="highlights" className="flex items-center gap-2">
+            <Highlighter className="h-4 w-4" />
+            Korostukseni
+          </TabsTrigger>
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Asetukset
           </TabsTrigger>
         </TabsList>
 
