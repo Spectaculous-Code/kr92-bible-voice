@@ -42,7 +42,9 @@ jobs:
           docker build -t docker.io/${{ steps.lower_repo.outputs.repo_name }}:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@7b7aa264d3dc58691451798b4d117d53d21edfe
+        # Changed the reference from a specific commit hash to a stable version tag.
+        # This is more reliable as commit hashes can sometimes be unstable.
+        uses: aquasecurity/trivy-action@v0.32.0
         with:
           image-ref: 'docker.io/${{ steps.lower_repo.outputs.repo_name }}:${{ github.sha }}'
           format: 'template'
