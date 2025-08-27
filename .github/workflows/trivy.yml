@@ -30,10 +30,8 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build an image from Dockerfile
-        # This step now has a `working-directory` to correctly locate the Dockerfile.
-        # It assumes the Dockerfile is in an 'app' folder. If your Dockerfile
-        # is in a different location, change 'app' to the correct path.
-        working-directory: ./app
+        # The working-directory has been removed. Docker will now look for the Dockerfile
+        # in the root of the repository, which is the default location.
         run: |
           docker build -t docker.io/${{ github.repository }}:${{ github.sha }} .
 
