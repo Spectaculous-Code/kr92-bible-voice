@@ -29,16 +29,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # This step sets a lowercase version of the repository name as a variable.
+      - name: Set lowercase repo name
+        id: lower_repo
+        run: |
+          echo "repo_name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
       - name: Build an image from Dockerfile
         # The working-directory has been removed. Docker will now look for the Dockerfile
         # in the root of the repository, which is the default location.
         run: |
-          docker build -t docker.io/${{ github.repository }}:${{ github.sha }} .
+          docker build -t docker.io/${{ steps.lower_repo.outputs.repo_name }}:${{ github.sha }} .
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@7b7aa264d83dc58691451798b4d117d53d21edfe
+        uses: aquasecurity/trivy-action@7b7aa264d3dc58691451798b4d117d53d21edfe
         with:
-          image-ref: 'docker.io/${{ github.repository }}:${{ github.sha }}'
+          image-ref: 'docker.io/${{ steps.lower_repo.outputs.repo_name }}:${{ github.sha }}'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
